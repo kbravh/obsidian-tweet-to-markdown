@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.1",
-	"minAppVersion": "0.9.12",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md/about",
+	"id": "obsidian-tweet-to-markdown",
+	"name": "Tweet to Markdown",
+	"version": "1.0.0",
+	"minAppVersion": "0.12.11",
+	"description": "Save tweets as Markdown files, along with their images, polls, etc.",
+	"author": "kbravh",
+	"authorUrl": "https://kbravh.dev",
 	"isDesktopOnly": false
 }
