@@ -1,4 +1,4 @@
-import { App, Notice, Plugin, PluginSettingTab, request, Setting, addIcon } from 'obsidian';
+import { App, Notice, Modal, Plugin, PluginSettingTab, request, Setting, addIcon } from 'obsidian';
 
 interface TTMSettings {
 	bearerToken: string;
@@ -79,9 +79,44 @@ class TTMSettingTab extends PluginSettingTab {
 			.addText(text => text
 				.setPlaceholder('Enter your bearer token')
 				.setValue('')
-				.onChange(async (value) => {
+				.onChange(async value => {
 					this.plugin.settings.bearerToken = value;
 					await this.plugin.saveSettings();
 				}));
+
+      new Setting(containerEl)
+        .setName('Note Location')
+        .setDesc('Where to store the created notes. Defaults to the root of the vault. Relative.')
+        .addText(text => text
+          .setPlaceholder('.')
+          .setValue('')
+          .onChange(async value => {
+            this.plugin.settings.noteLocation = value;
+            await this.plugin.saveSettings();
+          }))
+
+      new Setting(containerEl)
+        .setName('Download images')
+        .setDesc('Whether to link images or download them to your vault.')
+        .addToggle(toggle => toggle
+          .setValue(false)
+          .onChange(async value => {
+            this.plugin.settings.downloadAssets = value;
+            await this.plugin.saveSettings();
+          }))
+
+      new Setting(containerEl)
+        .setName('Asseet Location')
+        .setDesc('Where to store the downloaded assets. Defaults to `assets/`. Relative.')
+        .addText(text => text
+          .setPlaceholder('assets/')
+          .setValue('')
+          .setDisabled(this.plugin.settings.downloadAssets) // TODO - this does not update
+          .onChange(async value => {
+            this.plugin.settings.assetLocation = value;
+            await this.plugin.saveSettings();
+          }))
+
+
 	}
 }
