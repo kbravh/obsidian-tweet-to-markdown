@@ -3,12 +3,14 @@ import { App, Modal, Notice, Plugin, PluginSettingTab, request, Setting } from '
 interface TTMSettings {
 	bearerToken: string;
   noteLocation: string,
+  downloadAssets: boolean,
   assetLocation: string,
 }
 
 const DEFAULT_SETTINGS: TTMSettings = {
 	bearerToken: 'default',
   noteLocation: '.',
+  downloadAssets: false,
   assetLocation: './assets'
 }
 
