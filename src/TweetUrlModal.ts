@@ -1,9 +1,9 @@
 import { App, Modal, Setting } from "obsidian";
 
 export class TweetUrlModal extends Modal {
-  constructor(app: App, private url: string) {
+  url = '';
+  constructor(app: App) {
     super(app);
-    this.url = '';
   }
 
   onOpen() {
@@ -20,8 +20,8 @@ export class TweetUrlModal extends Modal {
       })
 
     new Setting(contentEl)
-      .setName('Download tweet')
       .addButton(button => {
+        button.setButtonText('Download Tweet')
         button.onClick(event => {
           console.log(event, this.url)
           this.close()
