@@ -1,18 +1,6 @@
 import { App, Notice, Modal, Plugin, PluginSettingTab, request, Setting, addIcon } from 'obsidian';
-
-interface TTMSettings {
-	bearerToken: string;
-  noteLocation: string,
-  downloadAssets: boolean,
-  assetLocation: string,
-}
-
-const DEFAULT_SETTINGS: TTMSettings = {
-	bearerToken: 'default',
-  noteLocation: '.',
-  downloadAssets: false,
-  assetLocation: './assets'
-}
+import { TTMSettings, DEFAULT_SETTINGS, TTMSettingTab } from 'src/settings';
+import { TweetUrlModal } from 'src/TweetUrlModal';
 
 export default class TTM extends Plugin {
 	settings: TTMSettings;
@@ -25,26 +13,23 @@ export default class TTM extends Plugin {
 		await this.loadSettings();
 
 		this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
-			new Notice('This is a notice!');
+			new TweetUrlModal(this.app).open();
 		});
 
-		// this.addCommand({
-		// 	id: 'open-sample-modal',
-		// 	name: 'Open Sample Modal',
-		// 	// callback: () => {
-		// 	// 	console.log('Simple Callback');
-		// 	// },
-		// 	checkCallback: (checking: boolean) => {
-		// 		let leaf = this.app.workspace.activeLeaf;
-		// 		if (leaf) {
-		// 			if (!checking) {
-		// 				new SampleModal(this.app).open();
-		// 			}
-		// 			return true;
-		// 		}
-		// 		return false;
-		// 	}
-		// });
+		this.addCommand({
+			id: 'open-tweet-url-modal',
+			name: 'Download Tweet from URL',
+			checkCallback: (checking: boolean) => {
+				let leaf = this.app.workspace.activeLeaf;
+				if (leaf) {
+					if (!checking) {
+						new TweetUrlModal(this.app).open();
+					}
+					return true;
+				}
+				return false;
+			}
+		});
 
 		this.addSettingTab(new TTMSettingTab(this.app, this));
 	}
@@ -55,68 +40,5 @@ export default class TTM extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-	}
-}
-
-class TTMSettingTab extends PluginSettingTab {
-	plugin: TTM;
-
-	constructor(app: App, plugin: TTM) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		let {containerEl} = this;
-
-		containerEl.empty();
-
-		containerEl.createEl('h2', {text: 'Settings for Tweet to Markdown'});
-
-		new Setting(containerEl)
-			.setName('Bearer Token')
-			.setDesc('Twitter v2 bearer token')
-			.addText(text => text
-				.setPlaceholder('Enter your bearer token')
-				.setValue('')
-				.onChange(async value => {
-					this.plugin.settings.bearerToken = value;
-					await this.plugin.saveSettings();
-				}));
-
-      new Setting(containerEl)
-        .setName('Note Location')
-        .setDesc('Where to store the created notes. Defaults to the root of the vault. Relative.')
-        .addText(text => text
-          .setPlaceholder('.')
-          .setValue('')
-          .onChange(async value => {
-            this.plugin.settings.noteLocation = value;
-            await this.plugin.saveSettings();
-          }))
-
-      new Setting(containerEl)
-        .setName('Download images')
-        .setDesc('Whether to link images or download them to your vault.')
-        .addToggle(toggle => toggle
-          .setValue(false)
-          .onChange(async value => {
-            this.plugin.settings.downloadAssets = value;
-            await this.plugin.saveSettings();
-          }))
-
-      new Setting(containerEl)
-        .setName('Asseet Location')
-        .setDesc('Where to store the downloaded assets. Defaults to `assets/`. Relative.')
-        .addText(text => text
-          .setPlaceholder('assets/')
-          .setValue('')
-          .setDisabled(this.plugin.settings.downloadAssets) // TODO - this does not update
-          .onChange(async value => {
-            this.plugin.settings.assetLocation = value;
-            await this.plugin.saveSettings();
-          }))
-
-
 	}
 }
