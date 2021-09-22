@@ -1,9 +1,12 @@
-import { App, Modal, Setting } from "obsidian";
+import TTM from "main";
+import { App, Modal, Notice, Setting } from "obsidian";
 
 export class TweetUrlModal extends Modal {
   url = '';
-  constructor(app: App) {
+  plugin;
+  constructor(app: App, plugin: TTM) {
     super(app);
+    this.plugin = plugin;
   }
 
   onOpen() {
@@ -24,6 +27,11 @@ export class TweetUrlModal extends Modal {
         button.setButtonText('Download Tweet')
         button.onClick(event => {
           console.log(event, this.url)
+          const bearerToken = process.env.TWITTER_BEARER_TOKEN || this.plugin.settings.bearerToken || '';
+          if (!bearerToken){
+            new Notice('Bearer token was not found.')
+            return
+          }
           this.close()
         })
       })

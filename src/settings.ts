@@ -34,9 +34,9 @@ export class TTMSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Bearer Token')
-			.setDesc('Twitter v2 bearer token')
+      .setDesc('Enter your bearer token from https://developer.twitter.com/en/portal/dashboard, or store it in the environment variable TWITTER_BEARER_TOKEN.')
 			.addText(text => text
-				.setPlaceholder('Enter your bearer token from https://developer.twitter.com/en/portal/dashboard')
+				.setPlaceholder('Twitter v2 bearer token')
 				.setValue('')
 				.onChange(async value => {
 					this.plugin.settings.bearerToken = value;
@@ -78,7 +78,7 @@ export class TTMSettingTab extends PluginSettingTab {
 
       new Setting(containerEl)
         .setName('Filename')
-        .setDesc('The name to give the saved tweet file. You can use the placeholders [[handle]], [[name]], and [[id]]. Defaults to "[[handle]] - [[id]]')
+        .setDesc('The name to give the saved tweet file. You can use the placeholders [[handle]], [[name]], and [[id]]. Defaults to "[[handle]] - [[id]]"')
         .addText(text => text
           .setPlaceholder('[[handle]] - [[id]]')
           .setValue('')

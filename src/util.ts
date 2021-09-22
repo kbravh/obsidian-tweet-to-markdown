@@ -112,7 +112,7 @@ export const createMediaElements = (media: Media[]): string[] => {
  * @param {("normal" | "thread" | "quoted")} type - Whether this is a normal, thread, or quoted tweet
  * @returns {string} - The Markdown string of the tweet
  */
-export const buildMarkdown = async (tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): string => {
+export const buildMarkdown = async (tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): Promise<string> => {
   let metrics = [];
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
@@ -176,7 +176,7 @@ export const buildMarkdown = async (tweet: Tweet, type: ("normal" | "thread" | "
   }
 
   if (tweet.includes.media) {
-    markdown = markdown.concat(createMediaElements(tweet.includes.media, options));
+    markdown = markdown.concat(createMediaElements(tweet.includes.media));
   }
 
   // indent all lines for a quoted tweet

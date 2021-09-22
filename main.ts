@@ -1,4 +1,4 @@
-import { App, Notice, Modal, Plugin, PluginSettingTab, request, Setting, addIcon } from 'obsidian';
+import { Plugin, addIcon } from 'obsidian';
 import { TTMSettings, DEFAULT_SETTINGS, TTMSettingTab } from 'src/settings';
 import { TweetUrlModal } from 'src/TweetUrlModal';
 
@@ -13,7 +13,7 @@ export default class TTM extends Plugin {
 		await this.loadSettings();
 
 		this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
-			new TweetUrlModal(this.app).open();
+			new TweetUrlModal(this.app, this).open();
 		});
 
 		this.addCommand({
@@ -23,7 +23,7 @@ export default class TTM extends Plugin {
 				let leaf = this.app.workspace.activeLeaf;
 				if (leaf) {
 					if (!checking) {
-						new TweetUrlModal(this.app).open();
+						new TweetUrlModal(this.app, this).open();
 					}
 					return true;
 				}
