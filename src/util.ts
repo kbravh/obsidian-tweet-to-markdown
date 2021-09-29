@@ -5,7 +5,7 @@ import { Media, Poll, Tweet } from "./models";
  * Parses out the tweet ID from the URL or ID that the user provided
  * @param {string} src - The URL or ID
  */
- const getTweetID = (src: string) => {
+ export const getTweetID = (src: string) => {
   let id;
   try {
     // Create a URL object with the source. If it fails, it's not a URL.
