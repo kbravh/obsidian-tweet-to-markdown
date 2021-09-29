@@ -1,5 +1,5 @@
 import TTM from "main";
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, Modal, Notice, Setting, TAbstractFile } from "obsidian";
 import { getTweet, getTweetID, buildMarkdown, createFilename } from "./util";
 
 export class TweetUrlModal extends Modal {
@@ -50,11 +50,23 @@ export class TweetUrlModal extends Modal {
           //write tweet
           const filename = createFilename(tweet, this.plugin.settings.filename)
 
-          const file = this.app.vault.getAbstractFileByPath(`${this.plugin.settings.noteLocation}/${filename}`);
+          // see if file already exists
+          let file: TAbstractFile;
+          try {
+            file = this.app.vault.getAbstractFileByPath(`${this.plugin.settings.noteLocation}/${filename}`);
+          }
+          catch (error) {}
           if (file) {
-            console.error(`The file ${filename} already exists`);
+            new Notice(`The file ${filename} already exists`);
             return;
           }
+
+          // create the directory
+          try {
+            this.app.vault.createFolder(this.plugin.settings.noteLocation);
+          } catch (error) {}
+
+          // write the note to file
           this.app.vault.create(`${this.plugin.settings.noteLocation}/${filename}`, final);
           new Notice(`${filename} created.`);
           this.close()

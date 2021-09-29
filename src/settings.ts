@@ -1,20 +1,21 @@
 import { PluginSettingTab, App, Setting } from "obsidian";
 import TTM from "main";
+import { settings } from "cluster";
 
 export interface TTMSettings {
-	bearerToken: string;
-  noteLocation: string,
+	bearerToken: string | null;
+  noteLocation: string | null,
   downloadAssets: boolean,
-  assetLocation: string,
-  filename: string
+  assetLocation: string | null,
+  filename: string | null
 }
 
 export const DEFAULT_SETTINGS: TTMSettings = {
-	bearerToken: 'default',
-  noteLocation: '.',
+	bearerToken: null,
+  noteLocation: null,
   downloadAssets: false,
-  assetLocation: './assets',
-  filename: '[[handle]] - [[id]]'
+  assetLocation: null,
+  filename: null
 }
 
 export class TTMSettingTab extends PluginSettingTab {
@@ -37,7 +38,7 @@ export class TTMSettingTab extends PluginSettingTab {
       .setDesc('Enter your bearer token from https://developer.twitter.com/en/portal/dashboard, or store it in the environment variable TWITTER_BEARER_TOKEN.')
 			.addText(text => text
 				.setPlaceholder('Twitter v2 bearer token')
-				.setValue('')
+				.setValue(this.plugin.settings.bearerToken)
 				.onChange(async value => {
 					this.plugin.settings.bearerToken = value;
 					await this.plugin.saveSettings();
@@ -45,10 +46,10 @@ export class TTMSettingTab extends PluginSettingTab {
 
       new Setting(containerEl)
         .setName('Note Location')
-        .setDesc('Where to store the created notes. Defaults to the root of the vault. Relative.')
+        .setDesc('Where to store the created notes. Defaults to the root of the vault.')
         .addText(text => text
-          .setPlaceholder('.')
-          .setValue('')
+          .setPlaceholder('tweets')
+          .setValue(this.plugin.settings.noteLocation)
           .onChange(async value => {
             this.plugin.settings.noteLocation = value;
             await this.plugin.saveSettings();
@@ -58,18 +59,18 @@ export class TTMSettingTab extends PluginSettingTab {
         .setName('Download images')
         .setDesc('Whether to link images or download them to your vault.')
         .addToggle(toggle => toggle
-          .setValue(false)
+          .setValue(this.plugin.settings.downloadAssets)
           .onChange(async value => {
             this.plugin.settings.downloadAssets = value;
             await this.plugin.saveSettings();
           }))
 
       new Setting(containerEl)
-        .setName('Asset Location')
-        .setDesc('Where to store the downloaded assets. Defaults to `assets/`. Relative to vault root.')
+        .setName('Image Location')
+        .setDesc('Where to store the downloaded images. Defaults to `assets/`.')
         .addText(text => text
           .setPlaceholder('assets/')
-          .setValue('')
+          .setValue(this.plugin.settings.assetLocation)
           // .setDisabled(this.plugin.settings.downloadAssets) // TODO - this does not update
           .onChange(async value => {
             this.plugin.settings.assetLocation = value;
@@ -81,7 +82,7 @@ export class TTMSettingTab extends PluginSettingTab {
         .setDesc('The name to give the saved tweet file. You can use the placeholders [[handle]], [[name]], and [[id]]. Defaults to "[[handle]] - [[id]]"')
         .addText(text => text
           .setPlaceholder('[[handle]] - [[id]]')
-          .setValue('')
+          .setValue(this.plugin.settings.filename)
           .onChange(async value => {
             this.plugin.settings.filename = value;
             await this.plugin.saveSettings();
