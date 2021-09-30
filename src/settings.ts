@@ -48,7 +48,7 @@ export class TTMSettingTab extends PluginSettingTab {
         .setName('Note Location')
         .setDesc('Where to store the created notes. Defaults to the root of the vault.')
         .addText(text => text
-          .setPlaceholder('tweets')
+          .setPlaceholder('tweets/')
           .setValue(this.plugin.settings.noteLocation)
           .onChange(async value => {
             this.plugin.settings.noteLocation = value;

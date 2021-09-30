@@ -1,4 +1,4 @@
-import { request } from "obsidian"
+import { App, request, TAbstractFile } from "obsidian"
 import { Media, Poll, Tweet } from "./models";
 
 /**
@@ -39,7 +39,7 @@ export const getTweet = async (
     'poll.fields': 'options',
   });
 
-  let tweet =  request({
+  let tweet = await request({
     method: 'GET',
     url: `${twitterUrl.href}?${params.toString()}`,
     headers: {Authorization: `Bearer ${bearer}`}
@@ -112,7 +112,7 @@ export const createMediaElements = (media: Media[]): string[] => {
  * @param {("normal" | "thread" | "quoted")} type - Whether this is a normal, thread, or quoted tweet
  * @returns {string} - The Markdown string of the tweet
  */
-export const buildMarkdown = async (tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): Promise<string> => {
+export const buildMarkdown = async (app: App, tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): Promise<string> => {
   let metrics = [];
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
@@ -191,6 +191,52 @@ export const buildMarkdown = async (tweet: Tweet, type: ("normal" | "thread" | "
   }
 }
 
+export const downloadImages = async (
+  app: App,
+  tweet: Tweet,
+  assetLocation: string = 'assets'
+): Promise<void[]> => {
+  const user = tweet.includes.users[0];
+
+  // create the image folder
+  try {
+    app.vault.createFolder(assetLocation);
+  } catch (error) {}
+
+  let filesToDownload = [];
+  filesToDownload.push({
+    url: user.profile_image_url,
+    title: `${user.username}-${user.id}.jpg`
+  });
+
+  tweet.includes.media.forEach((medium: Media) => {
+    switch(medium.type) {
+      case 'photo':
+        filesToDownload.push({
+          url: medium.url,
+          title: `${medium.media_key}.jpg`
+        });
+        break;
+      default:
+        break;
+    }
+  });
+
+  //Filter out tweet images that already exist locally
+  filesToDownload = filesToDownload.filter(
+    file => !doesFileExist(app, `${assetLocation}/${file.title}`)
+  );
+
+  return Promise.all(filesToDownload.map(async file => {
+    const image = await request({
+      method: 'GET',
+      url: file.url
+    });
+    console.log(image)
+    // app.vault.createBinary(`${assetLocation}/${file.title}`)
+  }));
+};
+
 /**
  * An async version of the Array.map() function.
  * @param {*[]} array - The array to be mapped over
@@ -202,3 +248,13 @@ export const asyncMap = async (
   mutator: Function
 ): Promise<any[]> => Promise.all(array.map((element) => mutator(element)));
 
+export const doesFileExist = (app: App, filepath: string) => {
+  // see if file already exists
+  let file: TAbstractFile;
+  try {
+    file = app.vault.getAbstractFileByPath(filepath);
+  }
+  catch (error) {}
+
+  return !!file;
+};
