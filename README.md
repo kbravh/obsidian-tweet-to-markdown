@@ -1,57 +1,84 @@
-## Obsidian Sample Plugin
+<br />
+<p align="center">
+  <a href="https://github.com/kbravh/obsidian-tweet-to-markdown">
+    <img src="images/obsidian-ttm-logo.svg" alt="Logo" height=200>
+  </a>
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+  <h3 align="center">Tweet to Markdown</h3>
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+  <p align="center">
+    An Obsidian plugin to quickly save tweets as Markdown.
+    <br />
+    <br />
+    <a href="https://github.com/kbravh/obsidian-tweet-to-markdown/issues">Report a Bug</a>
+    ·
+    <a href="https://github.com/kbravh/obsidian-tweet-to-markdown/issues">Request a Feature</a>
+  </p>
+</p>
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+<!-- ABOUT THE PROJECT -->
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Changes the default font color to red using `styles.css`.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## About The Project
 
-### First time developing plugins?
+This plugin allows you to quickly save a tweet in Markdown format. It is built on the new Twitter v2 API.
 
-Quick starting guide for new plugin devs:
+## Installing
 
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+Find this plugin in the listing of community plugins in Obsidian and add it to your application.
 
-### Releasing new releases
+Or, if you'd like to install it manually, clone this repository to the `.obsidian/plugins/` directory in your vault, navigate to your newly cloned folder, run `npm i` or `yarn` to install dependencies, and run `npm run build` or `yarn build` to compile the plugin.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments.
-- Publish the release.
+<!-- USAGE EXAMPLES -->
 
-### Adding your plugin to the community plugin list
+## Usage
 
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### Bearer token
+To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
-### How to use
+### Downloading a tweet
 
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
+Either click the Twitter logo in your sidebar or run the command `Download Tweet from URL` from the command palette. Then, just paste in the link to a tweet and click download.
 
-### Manually installing the plugin
+The tweet will be saved to a Markdown file in the root of your vault, or in the directory specified in your settings. Here's how the tweet will look:
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+![Screenshot of the rendered Markdown file](images/markdown_screenshot.png)
 
-### API Documentation
+Any attached images, polls, and links will also be linked and displayed in the file.
 
-See https://github.com/obsidianmd/obsidian-api
+## Options
+
+On the Tweet to Markdown settings page in Obsidian, you can customize the way the plugin works to better match your vault structure and workflow.
+
+### Custom File Name
+
+Tweets are usually saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
+
+### Custom File Path
+
+To save the tweet to a place other than the root of your vault, type a new path in the **Note Location** field. If this path doesn't exist, it will be recursively created.
+
+### Save Images Locally
+
+Want to really capture the entire tweet locally? You can flip the **Download images** switch to download all the tweet images as well, instead of just linking to the images on the web. If the tweet is ever deleted or Twitter is unavailable, you'll still have your note.
+
+Tweet images will be automatically saved to the directory `tweet-assets/`. If you'd like to save the assets to a custom directory, type that directory in the **Image location** field.
+
+Nota bene: Unfortunately, there is currently not a way to save gifs or videos from tweets using the v2 API.
+
+<!-- CONTRIBUTING -->
+
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+## License
+
+This project is licensed under the MIT License - see the [ `LICENSE` ](LICENSE) file for details
+
+<!-- CONTACT -->
+
+## Contact
+
+Karey Higuera - [@kbravh](https://twitter.com/kbravh) - karey.higuera@gmail.com
+
+Project Link: [https://github.com/kbravh/obsidian-tweet-to-markdown](https://github.com/kbravh/tweet-to-markdown)
