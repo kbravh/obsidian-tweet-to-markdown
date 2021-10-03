@@ -19,6 +19,7 @@ export interface Data {
   entities?: Entities;
   conversation_id?: string;
   attachments?: Attachment[];
+  referenced_tweets?: ReferencedTweet[];
 }
 
 export interface Entities {
@@ -27,7 +28,6 @@ export interface Entities {
   annotations?: Annotation[];
   hashtags?: Tag[];
   cashtags?: Tag[];
-  referencedTweets?: ReferencedTweet[];
 }
 
 export interface Error {
