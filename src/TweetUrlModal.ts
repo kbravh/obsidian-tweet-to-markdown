@@ -1,6 +1,6 @@
 import TTM from "main";
-import { App, Modal, Notice, Setting, TAbstractFile } from "obsidian";
-import { getTweet, getTweetID, buildMarkdown, createFilename, downloadImages, doesFileExist } from "./util";
+import { App, Modal, Notice, Setting } from "obsidian";
+import { getTweet, getTweetID, buildMarkdown, createFilename, downloadImages, doesFileExist, cleanFilepath } from "./util";
 
 export class TweetUrlModal extends Modal {
   url = '';
@@ -28,7 +28,6 @@ export class TweetUrlModal extends Modal {
         button.setButtonText('Download Tweet')
         button.onClick(async event => {
           // error checking for kickoff
-          console.log(process.env)
           const bearerToken = process.env.TWITTER_BEARER_TOKEN || this.plugin.settings.bearerToken || '';
           if (!this.url) {
             new Notice('No tweet link provided.')
@@ -45,7 +44,7 @@ export class TweetUrlModal extends Modal {
 
           // create markdown
           let final = '';
-          const markdown = await buildMarkdown(this.app, tweet);
+          const markdown = await buildMarkdown(this.plugin.settings, tweet);
           final = markdown + final;
 
           //write tweet
@@ -59,17 +58,20 @@ export class TweetUrlModal extends Modal {
           }
 
           // create the directory
-          try {
-            this.app.vault.createFolder(this.plugin.settings.noteLocation);
-          } catch (error) {}
+          this.app.vault.createFolder(this.plugin.settings.noteLocation).catch(_ => {});
 
           // write the note to file
-          this.app.vault.create(`${this.plugin.settings.noteLocation}/${filename}`, final);
+          this.app.vault.create(cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`), final);
 
           // download images
           if (this.plugin.settings.downloadAssets) {
-            console.log('Downloading images');
-            await downloadImages(this.app, tweet, this.plugin.settings.assetLocation ?? 'assets');
+            new Notice('Downloading images...');
+            await downloadImages(this.app, tweet, this.plugin.settings.assetLocation ?? 'assets')
+              .then(_ => new Notice('Images downloaded.'))
+              .catch(error => {
+                new Notice(`There was an error downloading the images.`)
+                console.error(error)
+              });
           }
           new Notice(`${filename} created.`);
           this.close()

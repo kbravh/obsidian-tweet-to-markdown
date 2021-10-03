@@ -1,5 +1,6 @@
-import { App, request, TAbstractFile } from "obsidian"
+import { App, Plugin, request, TAbstractFile } from "obsidian"
 import { Media, Poll, Tweet } from "./models";
+import { TTMSettings } from "./settings";
 
 /**
  * Parses out the tweet ID from the URL or ID that the user provided
@@ -95,13 +96,24 @@ export const createFilename = (tweet: Tweet, filename: string = ''): string => {
  * @param {Media[]} media - The tweet media object provided by the Twitter v2 API
  * @returns {string[]} - An array of markdown image links
  */
-export const createMediaElements = (media: Media[]): string[] => {
+export const createMediaElements = (settings: TTMSettings, media: Media[]): string[] => {
   return media.map((medium: Media) => {
-    switch (medium.type) {
-      case 'photo':
-        return `\n![${medium.media_key}](${medium.url})`
-      default:
-        break;
+    if (settings.downloadAssets){
+      const assetLocation = settings.assetLocation ?? 'assets'
+      const filepath = cleanFilepath(`${assetLocation}/${medium.media_key}.jpg`)
+      switch (medium.type) {
+        case 'photo':
+          return `\n![${medium.media_key}](${filepath})`
+        default:
+          break;
+      }
+    } else {
+      switch (medium.type) {
+        case 'photo':
+          return `\n![${medium.media_key}](${medium.url})`
+        default:
+          break;
+      }
     }
   })
 }
@@ -112,7 +124,7 @@ export const createMediaElements = (media: Media[]): string[] => {
  * @param {("normal" | "thread" | "quoted")} type - Whether this is a normal, thread, or quoted tweet
  * @returns {string} - The Markdown string of the tweet
  */
-export const buildMarkdown = async (app: App, tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): Promise<string> => {
+export const buildMarkdown = async (settings: TTMSettings, tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): Promise<string> => {
   let metrics = [];
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
@@ -160,8 +172,9 @@ export const buildMarkdown = async (app: App, tweet: Tweet, type: ("normal" | "t
     `---`
   ];
 
+  const assetPath = settings.assetLocation ?? 'assets'
   let markdown = [
-    `![${user.username}](${user.profile_image_url})`, // profile image
+    `![${user.username}](${settings.downloadAssets ? cleanFilepath(`${assetPath}/${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
     `\n`,
     `${text}`, // text of the tweet
@@ -176,7 +189,7 @@ export const buildMarkdown = async (app: App, tweet: Tweet, type: ("normal" | "t
   }
 
   if (tweet.includes.media) {
-    markdown = markdown.concat(createMediaElements(tweet.includes.media));
+    markdown = markdown.concat(createMediaElements(settings, tweet.includes.media));
   }
 
   // indent all lines for a quoted tweet
@@ -199,9 +212,7 @@ export const downloadImages = async (
   const user = tweet.includes.users[0];
 
   // create the image folder
-  try {
-    app.vault.createFolder(assetLocation);
-  } catch (error) {}
+  app.vault.createFolder(assetLocation).catch(_ => {});
 
   let filesToDownload = [];
   filesToDownload.push({
@@ -228,12 +239,10 @@ export const downloadImages = async (
   );
 
   return Promise.all(filesToDownload.map(async file => {
-    const image = await request({
-      method: 'GET',
-      url: file.url
-    });
-    console.log(image)
-    // app.vault.createBinary(`${assetLocation}/${file.title}`)
+    const image = await fetch(file.url, {
+      method: 'GET'
+    }).then(response => response.arrayBuffer())
+    await app.vault.createBinary(cleanFilepath(`${assetLocation}/${file.title}`), image)
   }));
 };
 
@@ -249,6 +258,7 @@ export const asyncMap = async (
 ): Promise<any[]> => Promise.all(array.map((element) => mutator(element)));
 
 export const doesFileExist = (app: App, filepath: string) => {
+  filepath = cleanFilepath(filepath)
   // see if file already exists
   let file: TAbstractFile;
   try {
@@ -258,3 +268,5 @@ export const doesFileExist = (app: App, filepath: string) => {
 
   return !!file;
 };
+
+export const cleanFilepath = (filepath: string): string => filepath.replace(/\/+/g, '/');

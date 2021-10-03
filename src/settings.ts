@@ -35,7 +35,7 @@ export class TTMSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Bearer Token')
-      .setDesc('Enter your bearer token from https://developer.twitter.com/en/portal/dashboard, or store it in the environment variable TWITTER_BEARER_TOKEN.')
+      .setDesc('Enter your V2 Twitter bearer token, or store it in the environment variable TWITTER_BEARER_TOKEN.')
 			.addText(text => text
 				.setPlaceholder('Twitter v2 bearer token')
 				.setValue(this.plugin.settings.bearerToken)
