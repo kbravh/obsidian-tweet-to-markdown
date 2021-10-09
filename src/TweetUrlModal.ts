@@ -1,13 +1,16 @@
 import TTM from "main";
 import { App, Modal, Notice, Setting } from "obsidian";
-import { getTweet, getTweetID, buildMarkdown, createFilename, downloadImages, doesFileExist, cleanFilepath } from "./util";
+import { TweetCompleteModal } from "./TweetCompleteModal";
+import { getTweet, getTweetID, buildMarkdown } from "./util";
 
 export class TweetUrlModal extends Modal {
   url = '';
   plugin;
-  constructor(app: App, plugin: TTM) {
+  tweetComplete: TweetCompleteModal;
+  constructor(app: App, plugin: TTM, tweetComplete: TweetCompleteModal) {
     super(app);
     this.plugin = plugin;
+    this.tweetComplete = tweetComplete;
   }
 
   onOpen() {
@@ -40,40 +43,13 @@ export class TweetUrlModal extends Modal {
 
           // fetch tweet
           const id = getTweetID(this.url);
-          const tweet = await getTweet(id, bearerToken);
+          this.plugin.currentTweet = await getTweet(id, bearerToken);
 
           // create markdown
-          let final = '';
-          const markdown = await buildMarkdown(this.plugin.settings, tweet);
-          final = markdown + final;
+          this.plugin.currentTweetMarkdown = '';
+          const markdown = await buildMarkdown(this.plugin.settings, this.plugin.currentTweet);
+          this.plugin.currentTweetMarkdown = markdown + this.plugin.currentTweetMarkdown;
 
-          //write tweet
-          const filename = createFilename(tweet, this.plugin.settings.filename)
-
-          // see if file already exists
-          const file = doesFileExist(this.app, `${this.plugin.settings.noteLocation}/${filename}`);
-          if (file) {
-            new Notice(`The file ${filename} already exists`);
-            return;
-          }
-
-          // create the directory
-          this.app.vault.createFolder(this.plugin.settings.noteLocation).catch(_ => {});
-
-          // write the note to file
-          this.app.vault.create(cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`), final);
-
-          // download images
-          if (this.plugin.settings.downloadAssets) {
-            new Notice('Downloading images...');
-            await downloadImages(this.app, tweet, this.plugin.settings.assetLocation ?? 'assets')
-              .then(_ => new Notice('Images downloaded.'))
-              .catch(error => {
-                new Notice(`There was an error downloading the images.`)
-                console.error(error)
-              });
-          }
-          new Notice(`${filename} created.`);
           this.close()
         })
       })
@@ -83,5 +59,6 @@ export class TweetUrlModal extends Modal {
     let {contentEl, titleEl} = this;
     titleEl.empty();
     contentEl.empty();
+    this.tweetComplete.open();
   }
 }

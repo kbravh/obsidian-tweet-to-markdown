@@ -75,14 +75,14 @@ export interface Tag {
   tag: string;
 }
 
-export interface TweetIncludes {
-  polls: Poll[];
+export interface Includes {
+  polls?: Poll[];
   users: User[];
-  media: Media[];
+  media?: Media[];
 }
 
 export interface Tweet {
-  includes: TweetIncludes;
+  includes: Includes;
   data: Data;
   errors?: Error[];
 }

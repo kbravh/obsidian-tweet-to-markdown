@@ -1,4 +1,4 @@
-import { App, Plugin, request, TAbstractFile } from "obsidian"
+import { App, Notice, Plugin, request, TAbstractFile } from "obsidian"
 import { Media, Poll, Tweet } from "./models";
 import { TTMSettings } from "./settings";
 
@@ -142,20 +142,20 @@ export const buildMarkdown = async (settings: TTMSettings, tweet: Tweet, type: (
     /**
      * replace any mentions, hashtags, cashtags, urls with links
      */
-    tweet.data.entities.mentions &&
-      tweet.data.entities.mentions.forEach(({ username }) => {
+    tweet.data?.entities?.mentions &&
+      tweet.data?.entities?.mentions.forEach(({ username }) => {
         text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`);
       });
-    tweet.data.entities.hashtags &&
-      tweet.data.entities.hashtags.forEach(({ tag }) => {
+    tweet.data?.entities?.hashtags &&
+      tweet.data?.entities?.hashtags.forEach(({ tag }) => {
         text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `);
       });
-    tweet.data.entities.cashtags &&
-      tweet.data.entities.cashtags.forEach(({ tag }) => {
+    tweet.data?.entities?.cashtags &&
+      tweet.data?.entities?.cashtags.forEach(({ tag }) => {
         text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`);
       });
-    tweet.data.entities.urls &&
-      tweet.data.entities.urls.forEach((url) => {
+    tweet.data?.entities?.urls &&
+      tweet.data?.entities?.urls.forEach((url) => {
         text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`);
       });
   }
@@ -220,7 +220,7 @@ export const downloadImages = async (
     title: `${user.username}-${user.id}.jpg`
   });
 
-  tweet.includes.media.forEach((medium: Media) => {
+  tweet.includes?.media?.forEach((medium: Media) => {
     switch(medium.type) {
       case 'photo':
         filesToDownload.push({
@@ -238,6 +238,11 @@ export const downloadImages = async (
     file => !doesFileExist(app, `${assetLocation}/${file.title}`)
   );
 
+  if (!filesToDownload.length) {
+    return Promise.resolve([])
+  }
+
+  new Notice('Downloading images...')
   return Promise.all(filesToDownload.map(async file => {
     const image = await fetch(file.url, {
       method: 'GET'

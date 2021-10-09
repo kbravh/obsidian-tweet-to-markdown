@@ -1,9 +1,13 @@
 import { Plugin, addIcon } from 'obsidian';
+import { Tweet } from 'src/models';
 import { TTMSettings, DEFAULT_SETTINGS, TTMSettingTab } from 'src/settings';
+import { TweetCompleteModal } from 'src/TweetCompleteModal';
 import { TweetUrlModal } from 'src/TweetUrlModal';
 
 export default class TTM extends Plugin {
 	settings: TTMSettings;
+  currentTweet: Tweet;
+  currentTweetMarkdown: string;
 
 	async onload() {
 		console.log('loading ttm');
@@ -13,7 +17,8 @@ export default class TTM extends Plugin {
 		await this.loadSettings();
 
 		this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
-			new TweetUrlModal(this.app, this).open();
+      const tweetComplete = new TweetCompleteModal(this.app, this);
+			new TweetUrlModal(this.app, this, tweetComplete).open();
 		});
 
 		this.addCommand({
@@ -23,7 +28,8 @@ export default class TTM extends Plugin {
 				let leaf = this.app.workspace.activeLeaf;
 				if (leaf) {
 					if (!checking) {
-						new TweetUrlModal(this.app, this).open();
+            const tweetComplete = new TweetCompleteModal(this.app, this);
+						new TweetUrlModal(this.app, this, tweetComplete).open();
 					}
 					return true;
 				}
