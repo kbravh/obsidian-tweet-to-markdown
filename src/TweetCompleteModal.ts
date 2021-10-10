@@ -43,20 +43,6 @@ export class TweetCompleteModal extends Modal {
           // write the note to file
           this.app.vault.create(cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`), this.plugin.currentTweetMarkdown);
 
-          // download images
-          if (this.plugin.settings.downloadAssets) {
-            await downloadImages(this.app, this.plugin.currentTweet, this.plugin.settings.assetLocation ?? 'assets')
-              .then(results => {
-                if(results.length) {
-                new Notice('Images downloaded.')
-                }
-              })
-              .catch(error => {
-                new Notice(`There was an error downloading the images.`)
-                console.error(error)
-              });
-          }
-
           new Notice(`${filename} created.`);
           this.close()
         })

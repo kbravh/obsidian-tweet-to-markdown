@@ -1,3 +1,4 @@
+import TTM from "main";
 import { App, Notice, Plugin, request, TAbstractFile } from "obsidian"
 import { Media, Poll, Tweet } from "./models";
 import { TTMSettings } from "./settings";
@@ -115,16 +116,13 @@ export const createMediaElements = (settings: TTMSettings, media: Media[]): stri
           break;
       }
     }
-  })
+  }).filter(medium => !!medium)
 }
 
 /**
  * Creates the entire Markdown string of the provided tweet
- * @param {Tweet} tweet - The entire tweet object provided by the Twitter v2 API
- * @param {("normal" | "thread" | "quoted")} type - Whether this is a normal, thread, or quoted tweet
- * @returns {string} - The Markdown string of the tweet
  */
-export const buildMarkdown = async (settings: TTMSettings, tweet: Tweet, type: ("normal" | "thread" | "quoted")='normal'): Promise<string> => {
+export const buildMarkdown = async (app: App, plugin: TTM, tweet: Tweet, type: ("normal" | "thread" | "quoted") = 'normal'): Promise<string> => {
   let metrics = [];
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
@@ -138,24 +136,24 @@ export const buildMarkdown = async (settings: TTMSettings, tweet: Tweet, type: (
   /**
    * replace entities with markdown links
    */
-  if (tweet.data.entities) {
+  if (tweet.data?.entities) {
     /**
      * replace any mentions, hashtags, cashtags, urls with links
      */
-    tweet.data?.entities?.mentions &&
-      tweet.data?.entities?.mentions.forEach(({ username }) => {
+    tweet.data.entities?.mentions &&
+      tweet.data.entities?.mentions.forEach(({ username }) => {
         text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`);
       });
-    tweet.data?.entities?.hashtags &&
-      tweet.data?.entities?.hashtags.forEach(({ tag }) => {
+    tweet.data.entities?.hashtags &&
+      tweet.data.entities?.hashtags.forEach(({ tag }) => {
         text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `);
       });
-    tweet.data?.entities?.cashtags &&
-      tweet.data?.entities?.cashtags.forEach(({ tag }) => {
+    tweet.data.entities?.cashtags &&
+      tweet.data.entities?.cashtags.forEach(({ tag }) => {
         text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`);
       });
-    tweet.data?.entities?.urls &&
-      tweet.data?.entities?.urls.forEach((url) => {
+    tweet.data.entities?.urls &&
+      tweet.data.entities?.urls.forEach((url) => {
         text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`);
       });
   }
@@ -172,9 +170,9 @@ export const buildMarkdown = async (settings: TTMSettings, tweet: Tweet, type: (
     `---`
   ];
 
-  const assetPath = settings.assetLocation ?? 'assets'
+  const assetPath = plugin.settings.assetLocation ?? 'assets'
   let markdown = [
-    `![${user.username}](${settings.downloadAssets ? cleanFilepath(`${assetPath}/${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
+    `![${user.username}](${plugin.settings.downloadAssets ? cleanFilepath(`${assetPath}/${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
     `\n`,
     `${text}`, // text of the tweet
@@ -184,12 +182,37 @@ export const buildMarkdown = async (settings: TTMSettings, tweet: Tweet, type: (
   markdown = markdown.map((line) => line.replace(/\n/g, '\n\n'));
 
   // Add in other tweet elements
-  if (tweet.includes.polls) {
+  if (tweet.includes?.polls) {
     markdown = markdown.concat(createPollTable(tweet.includes.polls));
   }
 
-  if (tweet.includes.media) {
-    markdown = markdown.concat(createMediaElements(settings, tweet.includes.media));
+  if (tweet.includes?.media) {
+    markdown = markdown.concat(createMediaElements(plugin.settings, tweet.includes?.media));
+  }
+
+  // download images
+  if (plugin.settings.downloadAssets) {
+    await downloadImages(app, tweet, plugin.settings.assetLocation ?? 'assets')
+      .then(results => {
+        if(results.length) {
+        new Notice('Images downloaded.')
+        }
+      })
+      .catch(error => {
+        new Notice(`There was an error downloading the images.`)
+        console.error(error)
+      });
+  }
+
+  // check for quoted tweets to be included
+  if (tweet.data?.referenced_tweets) {
+    for (const subtweet_ref of tweet.data?.referenced_tweets) {
+      if (subtweet_ref?.type === 'quoted') {
+        let subtweet = await getTweet(subtweet_ref.id, plugin.bearerToken);
+        let subtweet_text = await buildMarkdown(app, plugin, subtweet, 'quoted');
+        markdown.push('\n\n' + subtweet_text);
+      }
+    }
   }
 
   // indent all lines for a quoted tweet

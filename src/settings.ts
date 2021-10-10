@@ -1,6 +1,5 @@
 import { PluginSettingTab, App, Setting } from "obsidian";
 import TTM from "main";
-import { settings } from "cluster";
 
 export interface TTMSettings {
 	bearerToken: string | null;
@@ -71,7 +70,6 @@ export class TTMSettingTab extends PluginSettingTab {
         .addText(text => text
           .setPlaceholder('assets/')
           .setValue(this.plugin.settings.assetLocation)
-          // .setDisabled(this.plugin.settings.downloadAssets) // TODO - this does not update
           .onChange(async value => {
             this.plugin.settings.assetLocation = value;
             await this.plugin.saveSettings();

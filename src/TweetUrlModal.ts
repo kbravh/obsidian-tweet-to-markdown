@@ -41,13 +41,15 @@ export class TweetUrlModal extends Modal {
             return
           }
 
+          this.plugin.bearerToken = bearerToken;
+
           // fetch tweet
           const id = getTweetID(this.url);
           this.plugin.currentTweet = await getTweet(id, bearerToken);
 
           // create markdown
           this.plugin.currentTweetMarkdown = '';
-          const markdown = await buildMarkdown(this.plugin.settings, this.plugin.currentTweet);
+          const markdown = await buildMarkdown(this.app, this.plugin, this.plugin.currentTweet);
           this.plugin.currentTweetMarkdown = markdown + this.plugin.currentTweetMarkdown;
 
           this.close()
