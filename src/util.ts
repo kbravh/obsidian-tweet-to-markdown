@@ -57,6 +57,7 @@ export const getTweet = async (
       if(error.request) {
         throw new Error('There seems to be a connection issue.')
       } else {
+        console.error(error)
         throw new Error('An error occurred.')
       }
     })
@@ -220,10 +221,15 @@ export const buildMarkdown = async (app: App, plugin: TTM, tweet: Tweet, type: (
     markdown = markdown.map((line) => '> ' + line);
   }
 
-  if (type === 'normal') {
-    return frontmatter.concat(markdown).join('\n');
-  } else {
-    return '\n\n' + markdown.join('\n');
+  switch(type) {
+    case 'normal':
+      return frontmatter.concat(markdown).join('\n');
+    case 'thread':
+      return '\n\n---\n\n' + markdown.join('\n');
+    case 'quoted':
+      return '\n\n' + markdown.join('\n');
+      default:
+      return '\n\n' + markdown.join('\n');
   }
 }
 
