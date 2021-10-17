@@ -1,11 +1,12 @@
+import { assert } from "console";
 import TTM from "main";
 import { App, Notice, Plugin, request, TAbstractFile } from "obsidian"
 import { Media, Poll, Tweet } from "./models";
 import { TTMSettings } from "./settings";
 
 /**
- * Parses out the tweet ID from the URL or ID that the user provided
- * @param {string} src - The URL or ID
+ * Parses out the tweet ID from the URL the user provided
+ * @param {string} src - The URL
  */
  export const getTweetID = (src: string) => {
   let id;
@@ -16,8 +17,9 @@ import { TTMSettings } from "./settings";
       .split('/')
       .filter(piece => !!piece) // remove empty strings from array
       .slice(-1)[0];
+    assert(id)
   } catch (error) {
-    id = src;
+    throw new Error('URL does not seem to be a tweet.')
   }
   return id;
 };
@@ -58,7 +60,7 @@ export const getTweet = async (
         throw new Error('There seems to be a connection issue.')
       } else {
         console.error(error)
-        throw new Error('An error occurred.')
+        throw error
       }
     })
   return tweet;

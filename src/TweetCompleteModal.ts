@@ -53,5 +53,9 @@ export class TweetCompleteModal extends Modal {
     let {contentEl, titleEl} = this;
     titleEl.empty();
     contentEl.empty();
+
+    // clean up
+    this.plugin.currentTweet = null;
+    this.plugin.currentTweetMarkdown = null;
   }
 }

@@ -40,6 +40,7 @@ export class TweetUrlModal extends Modal {
       })
 
     new Setting(contentEl)
+      .setClass('download_tweet_button')
       .addButton(button => {
         button.setButtonText('Download Tweet')
         button.onClick(async event => {
@@ -47,18 +48,37 @@ export class TweetUrlModal extends Modal {
           const bearerToken = process.env.TWITTER_BEARER_TOKEN || this.plugin.settings.bearerToken || '';
           if (!this.url) {
             new Notice('No tweet link provided.')
-            return
+            return;
           }
+          let id = '';
+          try {
+            id = getTweetID(this.url);
+          } catch (error) {
+            new Notice(error.message);
+            return;
+          }
+
           if (!bearerToken){
             new Notice('Bearer token was not found.')
-            return
+            return;
           }
 
           this.plugin.bearerToken = bearerToken;
 
+          // set the button as loading
+          button.setButtonText('Loading...')
+          button.setDisabled(true)
+
           // fetch tweet
-          const id = getTweetID(this.url);
-          this.plugin.currentTweet = await getTweet(id, bearerToken);
+          try {
+            this.plugin.currentTweet = await getTweet(id, bearerToken);
+          } catch(error) {
+            new Notice(error.message);
+            // set the button as loading
+            button.setButtonText('Download Tweet')
+            button.setDisabled(false)
+            return;
+          }
           this.plugin.currentTweetMarkdown = '';
 
           // special handling for threads
