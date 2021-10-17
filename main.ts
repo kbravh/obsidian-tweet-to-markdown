@@ -17,10 +17,12 @@ export default class TTM extends Plugin {
 
 		await this.loadSettings();
 
-		this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
-      const tweetComplete = new TweetCompleteModal(this.app, this);
-			new TweetUrlModal(this.app, this, tweetComplete).open();
-		});
+    setTimeout(()=> { // add twitter icon with a delay so it won't end up first
+      this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
+        const tweetComplete = new TweetCompleteModal(this.app, this);
+        new TweetUrlModal(this.app, this, tweetComplete).open();
+      });
+    }, 100)
 
 		this.addCommand({
 			id: 'open-tweet-url-modal',
