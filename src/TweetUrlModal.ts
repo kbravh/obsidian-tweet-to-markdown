@@ -1,5 +1,6 @@
 import TTM from "main";
 import { App, Modal, Notice, Setting } from "obsidian";
+import { createDownloadManager, DownloadManager } from "./downloadManager";
 import { TweetCompleteModal } from "./TweetCompleteModal";
 import { getTweet, getTweetID, buildMarkdown } from "./util";
 
@@ -8,6 +9,7 @@ export class TweetUrlModal extends Modal {
   plugin;
   tweetComplete: TweetCompleteModal;
   thread = false;
+  downloadManager: DownloadManager;
   constructor(app: App, plugin: TTM, tweetComplete: TweetCompleteModal) {
     super(app);
     this.plugin = plugin;
@@ -65,6 +67,8 @@ export class TweetUrlModal extends Modal {
 
           this.plugin.bearerToken = bearerToken;
 
+          this.downloadManager = createDownloadManager()
+
           // set the button as loading
           button.setButtonText('Loading...')
           button.setDisabled(true)
@@ -85,7 +89,7 @@ export class TweetUrlModal extends Modal {
           if (this.thread) {
             // check if this is the head tweet
             while (this.plugin.currentTweet.data.conversation_id !== this.plugin.currentTweet.data.id) {
-              let markdown = await buildMarkdown(this.app, this.plugin, this.plugin.currentTweet, 'thread');
+              let markdown = await buildMarkdown(this.app, this.plugin, this.downloadManager, this.plugin.currentTweet, 'thread');
               this.plugin.currentTweetMarkdown = markdown + this.plugin.currentTweetMarkdown;
               // load in parent tweet
               let [parent_tweet] = this.plugin.currentTweet.data.referenced_tweets.filter((ref_tweet) => ref_tweet.type === 'replied_to');
@@ -93,9 +97,20 @@ export class TweetUrlModal extends Modal {
             }
           }
 
-          const markdown = await buildMarkdown(this.app, this.plugin, this.plugin.currentTweet);
+          const markdown = await buildMarkdown(this.app, this.plugin,this.downloadManager, this.plugin.currentTweet);
           this.plugin.currentTweetMarkdown = markdown + this.plugin.currentTweetMarkdown;
 
+
+          await this.downloadManager.finishDownloads()
+            .then(results => {
+              if(results.length) {
+              new Notice('Images downloaded.')
+              }
+            })
+            .catch(error => {
+              new Notice('There was an error downloading the images.')
+              console.error(error)
+            });
           this.close()
         })
       })

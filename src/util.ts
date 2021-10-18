@@ -1,6 +1,7 @@
 import { assert } from "console";
 import TTM from "main";
 import { App, Notice, Plugin, request, TAbstractFile } from "obsidian"
+import { DownloadManager } from "./downloadManager";
 import { Media, Poll, Tweet } from "./models";
 import { TTMSettings } from "./settings";
 
@@ -125,7 +126,7 @@ export const createMediaElements = (settings: TTMSettings, media: Media[]): stri
 /**
  * Creates the entire Markdown string of the provided tweet
  */
-export const buildMarkdown = async (app: App, plugin: TTM, tweet: Tweet, type: ("normal" | "thread" | "quoted") = 'normal'): Promise<string> => {
+export const buildMarkdown = async (app: App, plugin: TTM, downloadManager: DownloadManager, tweet: Tweet, type: ("normal" | "thread" | "quoted") = 'normal'): Promise<string> => {
   let metrics = [];
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
@@ -195,16 +196,7 @@ export const buildMarkdown = async (app: App, plugin: TTM, tweet: Tweet, type: (
 
   // download images
   if (plugin.settings.downloadAssets) {
-    await downloadImages(app, tweet, plugin.settings.assetLocation ?? 'assets')
-      .then(results => {
-        if(results.length) {
-        new Notice('Images downloaded.')
-        }
-      })
-      .catch(error => {
-        new Notice(`There was an error downloading the images.`)
-        console.error(error)
-      });
+    downloadImages(app, downloadManager, tweet, plugin.settings.assetLocation ?? 'assets')
   }
 
   // check for quoted tweets to be included
@@ -212,7 +204,7 @@ export const buildMarkdown = async (app: App, plugin: TTM, tweet: Tweet, type: (
     for (const subtweet_ref of tweet.data?.referenced_tweets) {
       if (subtweet_ref?.type === 'quoted') {
         let subtweet = await getTweet(subtweet_ref.id, plugin.bearerToken);
-        let subtweet_text = await buildMarkdown(app, plugin, subtweet, 'quoted');
+        let subtweet_text = await buildMarkdown(app, plugin, downloadManager, subtweet, 'quoted');
         markdown.push('\n\n' + subtweet_text);
       }
     }
@@ -235,11 +227,12 @@ export const buildMarkdown = async (app: App, plugin: TTM, tweet: Tweet, type: (
   }
 }
 
-export const downloadImages = async (
+export const downloadImages = (
   app: App,
+  downloadManager: DownloadManager,
   tweet: Tweet,
   assetLocation: string = 'assets'
-): Promise<void[]> => {
+): void => {
   const user = tweet.includes.users[0];
 
   // create the image folder
@@ -270,11 +263,10 @@ export const downloadImages = async (
   );
 
   if (!filesToDownload.length) {
-    return Promise.resolve([])
+    return;
   }
 
-  new Notice('Downloading images...')
-  return Promise.all(filesToDownload.map(async file => {
+  downloadManager.addDownloads(filesToDownload.map(async file => {
     const image = await fetch(file.url, {
       method: 'GET'
     }).then(response => response.arrayBuffer())
