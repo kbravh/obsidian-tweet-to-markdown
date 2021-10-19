@@ -35,13 +35,23 @@ Or, if you'd like to install it manually, clone this repository to the `.obsidia
 ### Bearer token
 To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
+Nota bene: On Unix machines, make sure to set this in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
+
 ### Downloading a tweet
 
 Either click the Twitter logo in your sidebar or run the command `Download Tweet from URL` from the command palette. Then, just paste in the link to a tweet and click download.
 
+To download a tweet thread, see [Downloading a tweet thread](###Thread)
+
+![The modal to download a new tweet.](images/download_tweet_modal.png)
+
+Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, and `[[id]]` when naming your file, which will be automatically replaced with the author's handle, name, and the tweet ID.
+
+![The modal to name a downloaded tweet.](images/tweet_complete_modal.png)
+
 The tweet will be saved to a Markdown file in the root of your vault, or in the directory specified in your settings. Here's how the tweet will look:
 
-![Screenshot of the rendered Markdown file](images/markdown_screenshot.png)
+![The rendered Markdown file](images/markdown_screenshot.png)
 
 Any attached images, polls, and links will also be linked and displayed in the file.
 
@@ -51,7 +61,7 @@ On the Tweet to Markdown settings page in Obsidian, you can customize the way th
 
 ### Custom File Name
 
-Tweets are usually saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
+Tweets are, by default, saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
 
 ### Custom File Path
 
@@ -63,7 +73,7 @@ Want to really capture the entire tweet locally? You can flip the **Download ima
 
 Tweet images will be automatically saved to the directory `tweet-assets/`. If you'd like to save the assets to a custom directory, type that directory in the **Image location** field.
 
-Nota bene: Unfortunately, there is currently not a way to save gifs or videos from tweets using the v2 API.
+Nota bene: Unfortunately, there is currently not a way to retrieve gifs or videos from tweets using the v2 API.
 
 <!-- CONTRIBUTING -->
 
