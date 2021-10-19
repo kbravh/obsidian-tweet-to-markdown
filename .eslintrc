@@ -1,0 +1,19 @@
+{
+  "extends": ["./node_modules/gts/"],
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "node/no-unpublished-require": 0,
+    "sort-imports": [
+      "warn",
+      {
+        "ignoreCase": true
+      }
+    ],
+    "node/no-unpublished-import": [
+      "error",
+      {
+        "allowModules": ["obsidian"]
+      }
+    ]
+  }
+}

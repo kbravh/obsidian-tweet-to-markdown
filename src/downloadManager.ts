@@ -1,25 +1,25 @@
-import { Notice } from "obsidian";
+import {Notice, TFile} from 'obsidian'
 
-export const createDownloadManager = () => {
-  let downloadList: any[] = []
-  let isAnnounced = false;
+export const createDownloadManager = (): DownloadManager => {
+  let downloadList: Promise<TFile>[]
+  let isAnnounced = false
 
-  const addDownloads = (downloads: Promise<any>[]): void => {
-    downloadList.push(downloads)
-    if (!isAnnounced){
-      isAnnounced = true;
+  const addDownloads = (downloads: Promise<TFile>[]): void => {
+    downloadList.push(...downloads)
+    if (!isAnnounced) {
+      isAnnounced = true
       new Notice('Downloading images...')
     }
   }
-  const finishDownloads = () => Promise.all(downloadList)
+  const finishDownloads = (): Promise<TFile[]> => Promise.all(downloadList)
 
   return {
     addDownloads,
-    finishDownloads
+    finishDownloads,
   } as DownloadManager
 }
 
 export interface DownloadManager {
-  addDownloads: (downloads: Promise<any>[]) => void;
-  finishDownloads: () => Promise<any[]>;
+  addDownloads: (downloads: Promise<TFile>[]) => void
+  finishDownloads: () => Promise<TFile[]>
 }

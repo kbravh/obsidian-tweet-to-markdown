@@ -1,61 +1,74 @@
-import TTM from "main";
-import { App, Modal, Notice, Setting } from "obsidian";
-import { createFilename, downloadImages, doesFileExist, cleanFilepath } from "./util";
+import {App, Modal, Notice, Setting} from 'obsidian'
+import {cleanFilepath, createFilename, doesFileExist} from './util'
+import TTM from 'main'
 
 export class TweetCompleteModal extends Modal {
-  plugin: TTM;
+  plugin: TTM
   constructor(app: App, plugin: TTM) {
-    super(app);
-    this.plugin = plugin;
+    super(app)
+    this.plugin = plugin
   }
 
-  onOpen() {
-    let {contentEl, titleEl} = this;
-    titleEl.setText('Name tweet file');
+  onOpen(): void {
+    const {contentEl, titleEl} = this
+    titleEl.setText('Name tweet file')
 
-    let filename = createFilename(this.plugin.currentTweet, this.plugin.settings.filename)
+    let filename = createFilename(
+      this.plugin.currentTweet,
+      this.plugin.settings.filename
+    )
 
     new Setting(contentEl)
       .setName('Filename')
-      .setDesc('Set the name of the file. You can use the placeholders [[handle]], [[name]], and [[id]].')
+      .setDesc(
+        'Set the name of the file. You can use the placeholders [[handle]], [[name]], and [[id]].'
+      )
       .addText(input => {
         input.setValue(filename)
-        input.onChange(value => {
-          filename = createFilename(this.plugin.currentTweet, value)
-        })
-        .setPlaceholder('[[handle]] - [[id]]')
+        input
+          .onChange(value => {
+            filename = createFilename(this.plugin.currentTweet, value)
+          })
+          .setPlaceholder('[[handle]] - [[id]]')
       })
 
-    new Setting(contentEl)
-      .addButton(button => {
-        button.setButtonText('Save Tweet')
-        button.onClick(async event => {
-          // see if file already exists
-          const file = doesFileExist(this.app, `${this.plugin.settings.noteLocation}/${filename}`);
-          if (file) {
-            new Notice(`The file ${filename} already exists`);
-            return;
-          }
+    new Setting(contentEl).addButton(button => {
+      button.setButtonText('Save Tweet')
+      button.onClick(async () => {
+        // see if file already exists
+        const file = doesFileExist(
+          this.app,
+          `${this.plugin.settings.noteLocation}/${filename}`
+        )
+        if (file) {
+          new Notice(`The file ${filename} already exists`)
+          return
+        }
 
-          // create the directory
-          this.app.vault.createFolder(this.plugin.settings.noteLocation).catch(_ => {});
+        // create the directory
+        this.app.vault
+          .createFolder(this.plugin.settings.noteLocation)
+          .catch(() => {})
 
-          // write the note to file
-          this.app.vault.create(cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`), this.plugin.currentTweetMarkdown);
+        // write the note to file
+        this.app.vault.create(
+          cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`),
+          this.plugin.currentTweetMarkdown
+        )
 
-          new Notice(`${filename} created.`);
-          this.close()
-        })
+        new Notice(`${filename} created.`)
+        this.close()
       })
+    })
   }
 
-  onClose() {
-    let {contentEl, titleEl} = this;
-    titleEl.empty();
-    contentEl.empty();
+  onClose(): void {
+    const {contentEl, titleEl} = this
+    titleEl.empty()
+    contentEl.empty()
 
     // clean up
-    this.plugin.currentTweet = null;
-    this.plugin.currentTweetMarkdown = null;
+    this.plugin.currentTweet = null
+    this.plugin.currentTweetMarkdown = null
   }
 }

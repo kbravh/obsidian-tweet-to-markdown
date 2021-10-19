@@ -1,29 +1,29 @@
-import { assert } from "console";
-import TTM from "main";
-import { App, Notice, Plugin, request, TAbstractFile } from "obsidian"
-import { DownloadManager } from "./downloadManager";
-import { Media, Poll, Tweet } from "./models";
-import { TTMSettings } from "./settings";
+import {App, request, TAbstractFile} from 'obsidian'
+import {Media, Poll, Tweet} from './models'
+import {assert} from 'console'
+import {DownloadManager} from './downloadManager'
+import TTM from 'main'
+import {TTMSettings} from './settings'
 
 /**
  * Parses out the tweet ID from the URL the user provided
  * @param {string} src - The URL
  */
- export const getTweetID = (src: string) => {
-  let id;
+export const getTweetID = (src: string): string => {
+  let id
   try {
     // Create a URL object with the source. If it fails, it's not a URL.
-    let url = new URL(src);
+    const url = new URL(src)
     id = url.pathname
       .split('/')
       .filter(piece => !!piece) // remove empty strings from array
-      .slice(-1)[0];
+      .slice(-1)[0]
     assert(id)
   } catch (error) {
     throw new Error('URL does not seem to be a tweet.')
   }
-  return id;
-};
+  return id
+}
 
 /**
  * Fetches a tweet object from the Twitter v2 API
@@ -31,40 +31,38 @@ import { TTMSettings } from "./settings";
  * @param {string} bearer - The bearer token
  * @returns {Tweet} - The tweet from the Twitter API
  */
-export const getTweet = async (
-  id: string,
-  bearer: string
-): Promise<Tweet> => {
-  let twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`);
-  let params = new URLSearchParams({
+export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
+  const twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
+  const params = new URLSearchParams({
     expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
     'user.fields': 'name,username,profile_image_url',
-    'tweet.fields': 'attachments,public_metrics,entities,conversation_id,referenced_tweets',
+    'tweet.fields':
+      'attachments,public_metrics,entities,conversation_id,referenced_tweets',
     'media.fields': 'url',
     'poll.fields': 'options',
-  });
+  })
 
-  let tweet = await request({
+  const tweet = await request({
     method: 'GET',
     url: `${twitterUrl.href}?${params.toString()}`,
-    headers: {Authorization: `Bearer ${bearer}`}
+    headers: {Authorization: `Bearer ${bearer}`},
   })
     .then(response => JSON.parse(response))
     .then((tweet: Tweet) => {
-      if(tweet.errors) {
+      if (tweet.errors) {
         throw new Error(tweet.errors[0].detail)
       }
       return tweet
     })
-    .catch((error) => {
-      if(error.request) {
+    .catch(error => {
+      if (error.request) {
         throw new Error('There seems to be a connection issue.')
       } else {
         console.error(error)
         throw error
       }
     })
-  return tweet;
+  return tweet
 }
 
 /**
@@ -74,9 +72,11 @@ export const getTweet = async (
  */
 export const createPollTable = (polls: Poll[]): string[] => {
   return polls.map((poll: Poll) => {
-    let table = ['\n|Option|Votes|', `|---|:---:|`];
-    let options = poll.options.map((option) => `|${option.label}|${option.votes}|`);
-    return table.concat(options).join('\n');
+    const table = ['\n|Option|Votes|', '|---|:---:|']
+    const options = poll.options.map(
+      option => `|${option.label}|${option.votes}|`
+    )
+    return table.concat(options).join('\n')
   })
 }
 
@@ -86,14 +86,14 @@ export const createPollTable = (polls: Poll[]): string[] => {
  * @param {filename} string - The filename provided by the user
  * @returns {string} - The filename based on tweet and options
  */
-export const createFilename = (tweet: Tweet, filename: string = ''): string => {
-  filename = filename ? filename : '[[handle]] - [[id]]';
+export const createFilename = (tweet: Tweet, filename = ''): string => {
+  filename = filename ? filename : '[[handle]] - [[id]]'
   filename = filename.replace(/.*\.md$/, '') // remove md extension if provided
-  filename = filename.replace('[[name]]', tweet.includes.users[0].name);
-  filename = filename.replace('[[handle]]', tweet.includes.users[0].username);
-  filename = filename.replace('[[id]]', tweet.data.id);
-  filename += '.md';
-  return filename;
+  filename = filename.replace('[[name]]', tweet.includes.users[0].name)
+  filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
+  filename = filename.replace('[[id]]', tweet.data.id)
+  filename += '.md'
+  return filename
 }
 
 /**
@@ -101,41 +101,54 @@ export const createFilename = (tweet: Tweet, filename: string = ''): string => {
  * @param {Media[]} media - The tweet media object provided by the Twitter v2 API
  * @returns {string[]} - An array of markdown image links
  */
-export const createMediaElements = (settings: TTMSettings, media: Media[]): string[] => {
-  return media.map((medium: Media) => {
-    if (settings.downloadAssets){
-      const assetLocation = settings.assetLocation ?? 'assets'
-      const filepath = cleanFilepath(`${assetLocation}/${medium.media_key}.jpg`)
-      switch (medium.type) {
-        case 'photo':
-          return `\n![${medium.media_key}](${filepath})`
-        default:
-          break;
+export const createMediaElements = (
+  settings: TTMSettings,
+  media: Media[]
+): string[] => {
+  return media
+    .map((medium: Media) => {
+      if (settings.downloadAssets) {
+        const assetLocation = settings.assetLocation ?? 'assets'
+        const filepath = cleanFilepath(
+          `${assetLocation}/${medium.media_key}.jpg`
+        )
+        switch (medium.type) {
+          case 'photo':
+            return `\n![${medium.media_key}](${filepath})`
+          default:
+            break
+        }
+      } else {
+        switch (medium.type) {
+          case 'photo':
+            return `\n![${medium.media_key}](${medium.url})`
+          default:
+            break
+        }
       }
-    } else {
-      switch (medium.type) {
-        case 'photo':
-          return `\n![${medium.media_key}](${medium.url})`
-        default:
-          break;
-      }
-    }
-  }).filter(medium => !!medium)
+    })
+    .filter(medium => !!medium)
 }
 
 /**
  * Creates the entire Markdown string of the provided tweet
  */
-export const buildMarkdown = async (app: App, plugin: TTM, downloadManager: DownloadManager, tweet: Tweet, type: ("normal" | "thread" | "quoted") = 'normal'): Promise<string> => {
-  let metrics = [];
+export const buildMarkdown = async (
+  app: App,
+  plugin: TTM,
+  downloadManager: DownloadManager,
+  tweet: Tweet,
+  type: 'normal' | 'thread' | 'quoted' = 'normal'
+): Promise<string> => {
+  let metrics = []
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
     `retweets: ${tweet.data.public_metrics.retweet_count}`,
-    `replies: ${tweet.data.public_metrics.reply_count}`
-  ];
+    `replies: ${tweet.data.public_metrics.reply_count}`,
+  ]
 
-  let text = tweet.data.text;
-  let user = tweet.includes.users[0];
+  let text = tweet.data.text
+  const user = tweet.includes.users[0]
 
   /**
    * replace entities with markdown links
@@ -145,85 +158,114 @@ export const buildMarkdown = async (app: App, plugin: TTM, downloadManager: Down
      * replace any mentions, hashtags, cashtags, urls with links
      */
     tweet.data.entities?.mentions &&
-      tweet.data.entities?.mentions.forEach(({ username }) => {
-        text = text.replace(`@${username}`, `[@${username}](https://twitter.com/${username})`);
-      });
+      tweet.data.entities?.mentions.forEach(({username}) => {
+        text = text.replace(
+          `@${username}`,
+          `[@${username}](https://twitter.com/${username})`
+        )
+      })
     tweet.data.entities?.hashtags &&
-      tweet.data.entities?.hashtags.forEach(({ tag }) => {
-        text = text.replace(`#${tag}`, `[#${tag}](https://twitter.com/hashtag/${tag}) `);
-      });
+      tweet.data.entities?.hashtags.forEach(({tag}) => {
+        text = text.replace(
+          `#${tag}`,
+          `[#${tag}](https://twitter.com/hashtag/${tag}) `
+        )
+      })
     tweet.data.entities?.cashtags &&
-      tweet.data.entities?.cashtags.forEach(({ tag }) => {
-        text = text.replace(`$${tag}`, `[$${tag}](https://twitter.com/search?q=%24${tag})`);
-      });
+      tweet.data.entities?.cashtags.forEach(({tag}) => {
+        text = text.replace(
+          `$${tag}`,
+          `[$${tag}](https://twitter.com/search?q=%24${tag})`
+        )
+      })
     tweet.data.entities?.urls &&
-      tweet.data.entities?.urls.forEach((url) => {
-        text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`);
-      });
+      tweet.data.entities?.urls.forEach(url => {
+        text = text.replace(
+          url.url,
+          `[${url.display_url}](${url.expanded_url})`
+        )
+      })
   }
 
   /**
    * Define the frontmatter as the name, handle, and source url
    */
-   let frontmatter = [
-    `---`,
+  const frontmatter = [
+    '---',
     `author: "${user.name}"`,
     `handle: "@${user.username}"`,
     `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
     ...metrics,
-    `---`
-  ];
+    '---',
+  ]
 
   const assetPath = plugin.settings.assetLocation ?? 'assets'
   let markdown = [
-    `![${user.username}](${plugin.settings.downloadAssets ? cleanFilepath(`${assetPath}/${user.username}-${user.id}.jpg`) : user.profile_image_url})`, // profile image
+    `![${user.username}](${
+      plugin.settings.downloadAssets
+        ? cleanFilepath(`${assetPath}/${user.username}-${user.id}.jpg`)
+        : user.profile_image_url
+    })`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
-    `\n`,
+    '\n',
     `${text}`, // text of the tweet
-  ];
+  ]
 
   // markdown requires 2 line breaks for actual new lines
-  markdown = markdown.map((line) => line.replace(/\n/g, '\n\n'));
+  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
 
   // Add in other tweet elements
   if (tweet.includes?.polls) {
-    markdown = markdown.concat(createPollTable(tweet.includes.polls));
+    markdown = markdown.concat(createPollTable(tweet.includes.polls))
   }
 
   if (tweet.includes?.media) {
-    markdown = markdown.concat(createMediaElements(plugin.settings, tweet.includes?.media));
+    markdown = markdown.concat(
+      createMediaElements(plugin.settings, tweet.includes?.media)
+    )
   }
 
   // download images
   if (plugin.settings.downloadAssets) {
-    downloadImages(app, downloadManager, tweet, plugin.settings.assetLocation ?? 'assets')
+    downloadImages(
+      app,
+      downloadManager,
+      tweet,
+      plugin.settings.assetLocation ?? 'assets'
+    )
   }
 
   // check for quoted tweets to be included
   if (tweet.data?.referenced_tweets) {
     for (const subtweet_ref of tweet.data?.referenced_tweets) {
       if (subtweet_ref?.type === 'quoted') {
-        let subtweet = await getTweet(subtweet_ref.id, plugin.bearerToken);
-        let subtweet_text = await buildMarkdown(app, plugin, downloadManager, subtweet, 'quoted');
-        markdown.push('\n\n' + subtweet_text);
+        const subtweet = await getTweet(subtweet_ref.id, plugin.bearerToken)
+        const subtweet_text = await buildMarkdown(
+          app,
+          plugin,
+          downloadManager,
+          subtweet,
+          'quoted'
+        )
+        markdown.push('\n\n' + subtweet_text)
       }
     }
   }
 
   // indent all lines for a quoted tweet
   if (type === 'quoted') {
-    markdown = markdown.map((line) => '> ' + line);
+    markdown = markdown.map(line => '> ' + line)
   }
 
-  switch(type) {
+  switch (type) {
     case 'normal':
-      return frontmatter.concat(markdown).join('\n');
+      return frontmatter.concat(markdown).join('\n')
     case 'thread':
-      return '\n\n---\n\n' + markdown.join('\n');
+      return '\n\n---\n\n' + markdown.join('\n')
     case 'quoted':
-      return '\n\n' + markdown.join('\n');
-      default:
-      return '\n\n' + markdown.join('\n');
+      return '\n\n' + markdown.join('\n')
+    default:
+      return '\n\n' + markdown.join('\n')
   }
 }
 
@@ -231,70 +273,66 @@ export const downloadImages = (
   app: App,
   downloadManager: DownloadManager,
   tweet: Tweet,
-  assetLocation: string = 'assets'
+  assetLocation = 'assets'
 ): void => {
-  const user = tweet.includes.users[0];
+  const user = tweet.includes.users[0]
 
   // create the image folder
-  app.vault.createFolder(assetLocation).catch(_ => {});
+  app.vault.createFolder(assetLocation).catch(() => {})
 
-  let filesToDownload = [];
+  let filesToDownload = []
   filesToDownload.push({
     url: user.profile_image_url,
-    title: `${user.username}-${user.id}.jpg`
-  });
+    title: `${user.username}-${user.id}.jpg`,
+  })
 
   tweet.includes?.media?.forEach((medium: Media) => {
-    switch(medium.type) {
+    switch (medium.type) {
       case 'photo':
         filesToDownload.push({
           url: medium.url,
-          title: `${medium.media_key}.jpg`
-        });
-        break;
+          title: `${medium.media_key}.jpg`,
+        })
+        break
       default:
-        break;
+        break
     }
-  });
+  })
 
   //Filter out tweet images that already exist locally
   filesToDownload = filesToDownload.filter(
     file => !doesFileExist(app, `${assetLocation}/${file.title}`)
-  );
+  )
 
   if (!filesToDownload.length) {
-    return;
+    return
   }
 
-  downloadManager.addDownloads(filesToDownload.map(async file => {
-    const image = await fetch(file.url, {
-      method: 'GET'
-    }).then(response => response.arrayBuffer())
-    await app.vault.createBinary(cleanFilepath(`${assetLocation}/${file.title}`), image)
-  }));
-};
+  downloadManager.addDownloads(
+    filesToDownload.map(async file => {
+      const image = await fetch(file.url, {
+        method: 'GET',
+      }).then(response => response.arrayBuffer())
+      return await app.vault.createBinary(
+        cleanFilepath(`${assetLocation}/${file.title}`),
+        image
+      )
+    })
+  )
+}
 
-/**
- * An async version of the Array.map() function.
- * @param {*[]} array - The array to be mapped over
- * @param {Function} mutator - The function to apply to every array element
- * @returns {Promise} - A Promise that resolves to the mapped array values
- */
-export const asyncMap = async (
-  array: any[],
-  mutator: Function
-): Promise<any[]> => Promise.all(array.map((element) => mutator(element)));
-
-export const doesFileExist = (app: App, filepath: string) => {
+export const doesFileExist = (app: App, filepath: string): boolean => {
   filepath = cleanFilepath(filepath)
   // see if file already exists
-  let file: TAbstractFile;
+  let file: TAbstractFile
   try {
-    file = app.vault.getAbstractFileByPath(filepath);
+    file = app.vault.getAbstractFileByPath(filepath)
+  } catch (error) {
+    return false
   }
-  catch (error) {}
 
-  return !!file;
-};
+  return !!file
+}
 
-export const cleanFilepath = (filepath: string): string => filepath.replace(/\/+/g, '/');
+export const cleanFilepath = (filepath: string): string =>
+  filepath.replace(/\/+/g, '/')
