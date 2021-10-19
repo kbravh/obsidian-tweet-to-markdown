@@ -41,9 +41,9 @@ Nota bene: On Unix machines, make sure to set this in your profile file (such as
 
 Either click the Twitter logo in your sidebar or run the command `Download Tweet from URL` from the command palette. Then, just paste in the link to a tweet and click download.
 
-To download a tweet thread, see [Downloading a tweet thread](###Thread)
+To download a tweet thread, paste the link to the **LAST** tweet in the thread, and toggle the Thread switch.
 
-![The modal to download a new tweet.](images/download_tweet_modal.png)
+![The modal to download a new tweet.](images/tweet_url_modal.png)
 
 Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, and `[[id]]` when naming your file, which will be automatically replaced with the author's handle, name, and the tweet ID.
 
