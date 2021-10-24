@@ -46,12 +46,12 @@ export class TweetCompleteModal extends Modal {
         }
 
         // create the directory
-        this.app.vault
+        await this.app.vault
           .createFolder(this.plugin.settings.noteLocation)
           .catch(() => {})
 
         // write the note to file
-        this.app.vault.create(
+        await this.app.vault.create(
           cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`),
           this.plugin.currentTweetMarkdown
         )
