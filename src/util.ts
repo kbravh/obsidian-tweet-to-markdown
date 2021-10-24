@@ -310,9 +310,10 @@ export const downloadImages = (
 
   downloadManager.addDownloads(
     filesToDownload.map(async file => {
-      const image = await fetch(file.url, {
+      const imageRequest = await fetch(file.url, {
         method: 'GET',
-      }).then(response => response.arrayBuffer())
+      })
+      const image = await imageRequest.arrayBuffer()
       return await app.vault.createBinary(
         cleanFilepath(`${assetLocation}/${file.title}`),
         image
