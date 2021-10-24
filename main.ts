@@ -32,7 +32,7 @@ export default class TTM extends Plugin {
       callback: () => {
         const tweetComplete = new TweetCompleteModal(this.app, this)
         new TweetUrlModal(this.app, this, tweetComplete).open()
-      }
+      },
     })
 
     this.addSettingTab(new TTMSettingTab(this.app, this))

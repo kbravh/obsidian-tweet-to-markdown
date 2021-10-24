@@ -1,6 +1,5 @@
 import {App, request, TAbstractFile} from 'obsidian'
 import {Media, Poll, Tweet} from './models'
-import {assert} from 'console'
 import {DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TTMSettings} from './settings'
@@ -10,16 +9,13 @@ import {TTMSettings} from './settings'
  * @param {string} src - The URL
  */
 export const getTweetID = (src: string): string => {
-  let id
-  try {
-    // Create a URL object with the source. If it fails, it's not a URL.
-    const url = new URL(src)
-    id = url.pathname
-      .split('/')
-      .filter(piece => !!piece) // remove empty strings from array
-      .slice(-1)[0]
-    assert(id)
-  } catch (error) {
+  // Create a URL object with the source. If it fails, it's not a URL.
+  const url = new URL(src)
+  const id = url.pathname
+    .split('/')
+    .filter(piece => !!piece) // remove empty strings from array
+    .slice(-1)[0]
+  if (!id) {
     throw new Error('URL does not seem to be a tweet.')
   }
   return id
