@@ -7,13 +7,11 @@ import {TweetCompleteModal} from './TweetCompleteModal'
 export class TweetUrlModal extends Modal {
   url = ''
   plugin
-  tweetComplete: TweetCompleteModal
   thread = false
   downloadManager: DownloadManager
-  constructor(app: App, plugin: TTM, tweetComplete: TweetCompleteModal) {
+  constructor(app: App, plugin: TTM) {
     super(app)
     this.plugin = plugin
-    this.tweetComplete = tweetComplete
   }
 
   onOpen(): void {
@@ -147,7 +145,11 @@ export class TweetUrlModal extends Modal {
     titleEl.empty()
     contentEl.empty()
     if (this.plugin.currentTweetMarkdown) {
-      this.tweetComplete.open()
+      this.plugin.tweetComplete = new TweetCompleteModal(
+        this.plugin.app,
+        this.plugin
+      )
+      this.plugin.tweetComplete.open()
     }
   }
 }

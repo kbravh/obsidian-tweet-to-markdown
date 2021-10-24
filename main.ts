@@ -9,6 +9,7 @@ export default class TTM extends Plugin {
   currentTweet: Tweet
   currentTweetMarkdown: string
   bearerToken: string
+  tweetComplete: TweetCompleteModal
 
   async onload(): Promise<void> {
     console.info('loading ttm')
@@ -22,16 +23,14 @@ export default class TTM extends Plugin {
 
     // add twitter icon with a delay so it won't end up first
     this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
-      const tweetComplete = new TweetCompleteModal(this.app, this)
-      new TweetUrlModal(this.app, this, tweetComplete).open()
+      new TweetUrlModal(this.app, this).open()
     })
 
     this.addCommand({
       id: 'open-tweet-url-modal',
       name: 'Download Tweet from URL',
       callback: () => {
-        const tweetComplete = new TweetCompleteModal(this.app, this)
-        new TweetUrlModal(this.app, this, tweetComplete).open()
+        new TweetUrlModal(this.app, this).open()
       },
     })
 
