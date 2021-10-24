@@ -1,6 +1,6 @@
-import {Plugin, addIcon} from 'obsidian'
+import {addIcon, Plugin} from 'obsidian'
+import {DEFAULT_SETTINGS, TTMSettings, TTMSettingTab} from 'src/settings'
 import {Tweet} from 'src/models'
-import {TTMSettings, DEFAULT_SETTINGS, TTMSettingTab} from 'src/settings'
 import {TweetCompleteModal} from 'src/TweetCompleteModal'
 import {TweetUrlModal} from 'src/TweetUrlModal'
 
@@ -10,7 +10,7 @@ export default class TTM extends Plugin {
   currentTweetMarkdown: string
   bearerToken: string
 
-  async onload() {
+  async onload(): Promise<void> {
     console.info('loading ttm')
 
     addIcon(
@@ -20,38 +20,29 @@ export default class TTM extends Plugin {
 
     await this.loadSettings()
 
-    setTimeout(() => {
-      // add twitter icon with a delay so it won't end up first
-      this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
-        const tweetComplete = new TweetCompleteModal(this.app, this)
-        new TweetUrlModal(this.app, this, tweetComplete).open()
-      })
-    }, 100)
+    // add twitter icon with a delay so it won't end up first
+    this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
+      const tweetComplete = new TweetCompleteModal(this.app, this)
+      new TweetUrlModal(this.app, this, tweetComplete).open()
+    })
 
     this.addCommand({
       id: 'open-tweet-url-modal',
       name: 'Download Tweet from URL',
-      checkCallback: (checking: boolean) => {
-        let leaf = this.app.workspace.activeLeaf
-        if (leaf) {
-          if (!checking) {
-            const tweetComplete = new TweetCompleteModal(this.app, this)
-            new TweetUrlModal(this.app, this, tweetComplete).open()
-          }
-          return true
-        }
-        return false
-      },
+      callback: () => {
+        const tweetComplete = new TweetCompleteModal(this.app, this)
+        new TweetUrlModal(this.app, this, tweetComplete).open()
+      }
     })
 
     this.addSettingTab(new TTMSettingTab(this.app, this))
   }
 
-  async loadSettings() {
+  async loadSettings(): Promise<void> {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
   }
 
-  async saveSettings() {
+  async saveSettings(): Promise<void> {
     await this.saveData(this.settings)
   }
 }
