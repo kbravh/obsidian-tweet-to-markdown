@@ -1,7 +1,7 @@
 import {Notice, TFile} from 'obsidian'
 
 export const createDownloadManager = (): DownloadManager => {
-  let downloadList: Promise<TFile>[]
+  const downloadList: Promise<TFile>[] = []
   let isAnnounced = false
 
   const addDownloads = (downloads: Promise<TFile>[]): void => {

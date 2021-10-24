@@ -126,7 +126,6 @@ export class TweetUrlModal extends Modal {
           await this.downloadManager
             .finishDownloads()
             .then(results => {
-              console.log(results)
               if (results.length) {
                 new Notice('Images downloaded.')
               }
