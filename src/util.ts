@@ -101,9 +101,7 @@ export const createMediaElements = (
     .map((medium: Media) => {
       if (settings.downloadAssets) {
         const assetLocation = settings.assetLocation ?? 'assets'
-        const filepath = cleanFilepath(
-          `${assetLocation}/${medium.media_key}.jpg`
-        )
+        const filepath = `${assetLocation}/${medium.media_key}.jpg`
         switch (medium.type) {
           case 'photo':
             return `\n![${medium.media_key}](${filepath})`
@@ -195,7 +193,7 @@ export const buildMarkdown = async (
   let markdown = [
     `![${user.username}](${
       plugin.settings.downloadAssets
-        ? cleanFilepath(`${assetPath}/${user.username}-${user.id}.jpg`)
+        ? `${assetPath}/${user.username}-${user.id}.jpg`
         : user.profile_image_url
     })`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
@@ -307,7 +305,7 @@ export const downloadImages = (
       })
       const image = await imageRequest.arrayBuffer()
       return await app.vault.createBinary(
-        cleanFilepath(`${assetLocation}/${file.title}`),
+        `${assetLocation}/${file.title}`,
         image
       )
     })
@@ -315,7 +313,6 @@ export const downloadImages = (
 }
 
 export const doesFileExist = (app: App, filepath: string): boolean => {
-  filepath = cleanFilepath(filepath)
   // see if file already exists
   let file: TAbstractFile
   try {
@@ -326,6 +323,3 @@ export const doesFileExist = (app: App, filepath: string): boolean => {
 
   return !!file
 }
-
-export const cleanFilepath = (filepath: string): string =>
-  filepath.replace(/\/+/g, '/')
