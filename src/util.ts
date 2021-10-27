@@ -38,18 +38,21 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
     'poll.fields': 'options',
   })
 
-  const tweetRequest = await request({
-    method: 'GET',
-    url: `${twitterUrl.href}?${params.toString()}`,
-    headers: {Authorization: `Bearer ${bearer}`},
-  }).catch(error => {
+  let tweetRequest
+  try {
+    tweetRequest = await request({
+      method: 'GET',
+      url: `${twitterUrl.href}?${params.toString()}`,
+      headers: {Authorization: `Bearer ${bearer}`},
+    })
+  } catch (error) {
     if (error.request) {
       throw new Error('There seems to be a connection issue.')
     } else {
       console.error(error)
       throw error
     }
-  })
+  }
   const tweet: Tweet = JSON.parse(tweetRequest)
   if (tweet.errors) {
     throw new Error(tweet.errors[0].detail)
