@@ -1,4 +1,4 @@
-import {App, request, TAbstractFile} from 'obsidian'
+import {App, normalizePath, request, TAbstractFile} from 'obsidian'
 import {Media, Poll, Tweet} from './models'
 import {DownloadManager} from './downloadManager'
 import TTM from 'main'
@@ -104,7 +104,9 @@ export const createMediaElements = (
     .map((medium: Media) => {
       if (settings.downloadAssets) {
         const assetLocation = settings.assetLocation ?? 'assets'
-        const filepath = `${assetLocation}/${medium.media_key}.jpg`
+        const filepath = normalizePath(
+          `${assetLocation}/${medium.media_key}.jpg`
+        )
         switch (medium.type) {
           case 'photo':
             return `\n![${medium.media_key}](${filepath})`
@@ -196,7 +198,7 @@ export const buildMarkdown = async (
   let markdown = [
     `![${user.username}](${
       plugin.settings.downloadAssets
-        ? `${assetPath}/${user.username}-${user.id}.jpg`
+        ? normalizePath(`${assetPath}/${user.username}-${user.id}.jpg`)
         : user.profile_image_url
     })`, // profile image
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
