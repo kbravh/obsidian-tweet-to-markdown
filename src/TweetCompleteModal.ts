@@ -1,5 +1,5 @@
 import {App, Modal, Notice, Setting} from 'obsidian'
-import {cleanFilepath, createFilename, doesFileExist} from './util'
+import {createFilename, doesFileExist} from './util'
 import TTM from 'main'
 
 export class TweetCompleteModal extends Modal {
@@ -46,13 +46,24 @@ export class TweetCompleteModal extends Modal {
         }
 
         // create the directory
-        await this.app.vault
-          .createFolder(this.plugin.settings.noteLocation)
-          .catch(() => {})
+        const doesFolderExist = await this.app.vault.adapter.exists(
+          this.plugin.settings.noteLocation
+        )
+        if (!doesFolderExist) {
+          await this.app.vault
+            .createFolder(this.plugin.settings.noteLocation)
+            .catch(error => {
+              new Notice('Error creating tweet directory.')
+              console.error(
+                'There was an error creating the tweet directory.',
+                error
+              )
+            })
+        }
 
         // write the note to file
         await this.app.vault.create(
-          cleanFilepath(`${this.plugin.settings.noteLocation}/${filename}`),
+          `${this.plugin.settings.noteLocation}/${filename}`,
           this.plugin.currentTweetMarkdown
         )
 
