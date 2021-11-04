@@ -318,6 +318,7 @@ export const downloadImages = (
 }
 
 export const doesFileExist = (app: App, filepath: string): boolean => {
+  filepath = normalizePath(filepath)
   // see if file already exists
   let file: TAbstractFile
   try {
@@ -325,6 +326,5 @@ export const doesFileExist = (app: App, filepath: string): boolean => {
   } catch (error) {
     return false
   }
-
   return !!file
 }
