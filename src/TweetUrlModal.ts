@@ -1,4 +1,4 @@
-import {App, Modal, Notice, Setting} from 'obsidian'
+import {App, Modal, Notice, Platform, Setting} from 'obsidian'
 import {buildMarkdown, getTweet, getTweetID} from './util'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import TTM from 'main'
@@ -45,10 +45,15 @@ export class TweetUrlModal extends Modal {
         button.setButtonText('Download Tweet')
         button.onClick(async () => {
           // error checking for kickoff
-          const bearerToken =
-            process.env.TWITTER_BEARER_TOKEN ||
-            this.plugin.settings.bearerToken ||
-            ''
+          let bearerToken
+          if (Platform.isMobileApp) {
+            bearerToken = this.plugin.settings.bearerToken || ''
+          } else {
+            bearerToken =
+              this.plugin.settings.bearerToken ||
+              process.env.TWITTER_BEARER_TOKEN ||
+              ''
+          }
           if (!this.url) {
             new Notice('No tweet link provided.')
             return

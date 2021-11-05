@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, Setting} from 'obsidian'
+import {App, Platform, PluginSettingTab, Setting} from 'obsidian'
 import TTM from 'main'
 
 export interface TTMSettings {
@@ -33,7 +33,9 @@ export class TTMSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Bearer Token')
       .setDesc(
-        'Enter your V2 Twitter bearer token, or store it in the environment variable TWITTER_BEARER_TOKEN.'
+        Platform.isMobileApp
+          ? 'Enter your V2 Twitter bearer token.'
+          : 'Enter your V2 Twitter bearer token, or store it in the environment variable TWITTER_BEARER_TOKEN.'
       )
       .addText(text =>
         text
