@@ -1,7 +1,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/kbravh/obsidian-tweet-to-markdown">
-    <img src="images/obsidian-ttm-logo.svg" alt="Logo" height=200>
+    <img src="https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/obsidian-ttm-logo.svg" alt="Logo" height=200>
   </a>
 
   <h3 align="center">Tweet to Markdown</h3>
@@ -33,7 +33,7 @@ Or, if you'd like to install it manually, clone this repository to the `.obsidia
 ## Usage
 
 ### Bearer token
-To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
+To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
 Nota bene: On Unix machines, make sure to set this in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
 
@@ -43,15 +43,15 @@ Either click the Twitter logo in your sidebar or run the command `Download Tweet
 
 To download a tweet thread, paste the link to the **LAST** tweet in the thread, and toggle the Thread switch.
 
-![The modal to download a new tweet.](images/tweet_url_modal.png)
+![The modal to download a new tweet.](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/tweet_url_modal.png)
 
 Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, and `[[id]]` when naming your file, which will be automatically replaced with the author's handle, name, and the tweet ID.
 
-![The modal to name a downloaded tweet.](images/tweet_complete_modal.png)
+![The modal to name a downloaded tweet.](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/tweet_complete_modal.png)
 
 The tweet will be saved to a Markdown file in the root of your vault, or in the directory specified in your settings. Here's how the tweet will look:
 
-![The rendered Markdown file](images/markdown_screenshot.png)
+![The rendered Markdown file](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/markdown_screenshot.png)
 
 Any attached images, polls, and links will also be linked and displayed in the file.
 
@@ -83,7 +83,7 @@ Contributions are what make the open source community such an amazing place to l
 
 ## License
 
-This project is licensed under the MIT License - see the [ `LICENSE` ](LICENSE) file for details
+This project is licensed under the MIT License - see the [ `LICENSE` ](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/LICENSE) file for details
 
 <!-- CONTACT -->
 
