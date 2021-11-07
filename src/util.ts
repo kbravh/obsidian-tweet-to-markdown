@@ -103,7 +103,7 @@ export const createMediaElements = (
   return media
     .map((medium: Media) => {
       if (settings.downloadAssets) {
-        const assetLocation = settings.assetLocation ?? 'assets'
+        const assetLocation = settings.assetLocation || 'assets'
         const filepath = normalizePath(
           `${assetLocation}/${medium.media_key}.jpg`
         )
@@ -194,7 +194,7 @@ export const buildMarkdown = async (
     '---',
   ]
 
-  const assetPath = plugin.settings.assetLocation ?? 'assets'
+  const assetPath = plugin.settings.assetLocation || 'assets'
   let markdown = [
     `![${user.username}](${
       plugin.settings.downloadAssets
@@ -226,7 +226,7 @@ export const buildMarkdown = async (
       app,
       downloadManager,
       tweet,
-      plugin.settings.assetLocation ?? 'assets'
+      plugin.settings.assetLocation || 'assets'
     )
   }
 
