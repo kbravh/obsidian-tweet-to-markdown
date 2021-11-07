@@ -45,20 +45,22 @@ export class TweetCompleteModal extends Modal {
           return
         }
 
-        // create the directory
-        const doesFolderExist = await this.app.vault.adapter.exists(
-          this.plugin.settings.noteLocation
-        )
-        if (!doesFolderExist) {
-          await this.app.vault
-            .createFolder(this.plugin.settings.noteLocation)
-            .catch(error => {
-              new Notice('Error creating tweet directory.')
-              console.error(
-                'There was an error creating the tweet directory.',
-                error
-              )
-            })
+        if (this.plugin.settings.noteLocation) {
+          // create the directory
+          const doesFolderExist = await this.app.vault.adapter.exists(
+            this.plugin.settings.noteLocation
+          )
+          if (!doesFolderExist) {
+            await this.app.vault
+              .createFolder(this.plugin.settings.noteLocation)
+              .catch(error => {
+                new Notice('Error creating tweet directory.')
+                console.error(
+                  'There was an error creating the tweet directory.',
+                  error
+                )
+              })
+          }
         }
 
         // write the note to file

@@ -11,9 +11,9 @@ export interface TTMSettings {
 
 export const DEFAULT_SETTINGS: TTMSettings = {
   bearerToken: null,
-  noteLocation: null,
+  noteLocation: '',
   downloadAssets: false,
-  assetLocation: null,
+  assetLocation: '',
   filename: null,
 }
 
