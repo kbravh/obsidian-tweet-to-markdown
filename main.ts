@@ -21,6 +21,18 @@ export default class TTM extends Plugin {
 
     await this.loadSettings()
 
+    // clean up null string default settings
+    if (this.settings.noteLocation === null) {
+      this.settings.noteLocation = ''
+      console.info('Cleaning up note location setting.')
+      await this.saveSettings()
+    }
+    if (this.settings.assetLocation === null) {
+      this.settings.assetLocation = ''
+      console.info('Cleaning up asset location setting.')
+      await this.saveSettings()
+    }
+
     // add twitter icon with a delay so it won't end up first
     this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
       new TweetUrlModal(this.app, this).open()
