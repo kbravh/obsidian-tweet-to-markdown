@@ -83,7 +83,7 @@ export const createPollTable = (polls: Poll[]): string[] => {
  */
 export const createFilename = (tweet: Tweet, filename = ''): string => {
   filename = filename ? filename : '[[handle]] - [[id]]'
-  filename = filename.replace(/.*\.md$/, '') // remove md extension if provided
+  filename = filename.replace(/\.md$/, '') // remove md extension if provided
   filename = filename.replace('[[name]]', tweet.includes.users[0].name)
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
   filename = filename.replace('[[id]]', tweet.data.id)
