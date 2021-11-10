@@ -57,6 +57,13 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
   if (tweet.errors) {
     throw new Error(tweet.errors[0].detail)
   }
+  if (tweet?.reason) {
+    switch (tweet.reason) {
+      case 'client-not-enrolled':
+      default:
+        throw new Error('There seems to be a problem with your bearer token.')
+    }
+  }
   return tweet
 }
 
@@ -87,6 +94,7 @@ export const createFilename = (tweet: Tweet, filename = ''): string => {
   filename = filename.replace('[[name]]', tweet.includes.users[0].name)
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
   filename = filename.replace('[[id]]', tweet.data.id)
+  filename = filename.replace('[[text]]', normalizePath(tweet.data.text))
   filename += '.md'
   return filename
 }
@@ -135,7 +143,7 @@ export const buildMarkdown = async (
   tweet: Tweet,
   type: 'normal' | 'thread' | 'quoted' = 'normal'
 ): Promise<string> => {
-  let metrics = []
+  let metrics: string[] = []
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
     `retweets: ${tweet.data.public_metrics.retweet_count}`,
