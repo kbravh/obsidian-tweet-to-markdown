@@ -21,7 +21,7 @@ export class TweetCompleteModal extends Modal {
     new Setting(contentEl)
       .setName('Filename')
       .setDesc(
-        'Set the name of the file. You can use the placeholders [[handle]], [[name]], and [[id]].'
+        'Set the name of the file. You can use the placeholders [[handle]], [[name]], [[text]], and [[id]].'
       )
       .addText(input => {
         input.setValue(filename)

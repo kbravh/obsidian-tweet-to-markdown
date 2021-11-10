@@ -45,7 +45,14 @@ To download a tweet thread, paste the link to the **LAST** tweet in the thread, 
 
 ![The modal to download a new tweet.](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/tweet_url_modal.png)
 
-Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, and `[[id]]` when naming your file, which will be automatically replaced with the author's handle, name, and the tweet ID.
+Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, `[[text]]`, and `[[id]]` when naming your file, which will be automatically replaced according to the following chart. The file extension `.md` will be added automatically.
+
+| Variable | Replacement |
+|:---:|---|
+|[[handle]]|The user's handle (the part that follows the @ symbol)|
+|[[name]]|The user's name|
+|[[id]]|The unique ID assigned to the tweet|
+|[[text]]|The entire text of the tweet|
 
 ![The modal to name a downloaded tweet.](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/tweet_complete_modal.png)
 
@@ -61,7 +68,14 @@ On the Tweet to Markdown settings page in Obsidian, you can customize the way th
 
 ### Custom File Name
 
-Tweets are, by default, saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, and `[[id]]` in your filename, which will automatically be replaced. The file extension `.md` will also be added.
+Tweets are, by default, saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, `[[text]]`, and `[[id]]` in your filename,  which will be automatically replaced according to the following chart. The file extension `.md` will be added automatically.
+
+| Variable | Replacement |
+|:---:|---|
+|[[handle]]|The user's handle (the part that follows the @ symbol)|
+|[[name]]|The user's name|
+|[[id]]|The unique ID assigned to the tweet|
+|[[text]]|The entire text of the tweet|
 
 ### Custom File Path
 

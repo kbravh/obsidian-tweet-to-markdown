@@ -90,7 +90,7 @@ export class TTMSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Filename')
       .setDesc(
-        'The name to give the saved tweet file. You can use the placeholders [[handle]], [[name]], and [[id]]. Defaults to "[[handle]] - [[id]]"'
+        'The name to give the saved tweet file. You can use the placeholders [[handle]], [[name]], [[text]] and [[id]]. Defaults to "[[handle]] - [[id]]"'
       )
       .addText(text =>
         text

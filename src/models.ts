@@ -85,6 +85,8 @@ export interface Tweet {
   includes: Includes
   data: Data
   errors?: Error[]
+  // other error fields
+  reason?: string
 }
 
 export interface TweetURL {
