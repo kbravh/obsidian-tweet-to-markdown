@@ -1,6 +1,7 @@
 import {App, normalizePath, request, TAbstractFile} from 'obsidian'
 import {Media, Poll, Tweet} from './models'
 import {DownloadManager} from './downloadManager'
+import sanitize from 'sanitize-filename'
 import TTM from 'main'
 import {TTMSettings} from './settings'
 
@@ -94,9 +95,9 @@ export const createFilename = (tweet: Tweet, filename = ''): string => {
   filename = filename.replace('[[name]]', tweet.includes.users[0].name)
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
   filename = filename.replace('[[id]]', tweet.data.id)
-  filename = filename.replace('[[text]]', normalizePath(tweet.data.text))
+  filename = filename.replace('[[text]]', tweet.data.text)
   filename += '.md'
-  return filename
+  return sanitize(filename)
 }
 
 /**
