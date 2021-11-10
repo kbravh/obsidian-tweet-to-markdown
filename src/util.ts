@@ -96,8 +96,7 @@ export const createFilename = (tweet: Tweet, filename = ''): string => {
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
   filename = filename.replace('[[id]]', tweet.data.id)
   filename = filename.replace('[[text]]', tweet.data.text)
-  filename += '.md'
-  return sanitize(filename)
+  return sanitize(filename) + '.md'
 }
 
 /**
