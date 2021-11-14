@@ -1,7 +1,6 @@
 import {App, normalizePath, request, TAbstractFile} from 'obsidian'
 import {Media, Poll, Tweet} from './models'
 import {DownloadManager} from './downloadManager'
-import sanitize from 'sanitize-filename'
 import TTM from 'main'
 import {TTMSettings} from './settings'
 
@@ -84,6 +83,27 @@ export const createPollTable = (polls: Poll[]): string[] => {
 }
 
 /**
+ * Filename sanitization. Credit: parshap/node-sanitize-filename
+ * Rewrite to allow functionality on Obsidian mobile.
+ */
+const illegalRe = /[/?<>\\:*|"]/g
+// eslint-disable-next-line no-control-regex
+const controlRe = /[\x00-\x1f\x80-\x9f]/g
+const reservedRe = /^\.+$/
+const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
+const windowsTrailingRe = /[. ]+$/
+
+export const sanitizeFilename = (filename: string): string => {
+  filename = filename
+    .replace(illegalRe, '')
+    .replace(controlRe, '')
+    .replace(reservedRe, '')
+    .replace(windowsReservedRe, '')
+    .replace(windowsTrailingRe, '')
+  return filename
+}
+
+/**
  * Creates a filename based on the tweet and the user defined options.
  * @param {Tweet} tweet - The entire tweet object from the Twitter v2 API
  * @param {filename} string - The filename provided by the user
@@ -96,7 +116,7 @@ export const createFilename = (tweet: Tweet, filename = ''): string => {
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
   filename = filename.replace('[[id]]', tweet.data.id)
   filename = filename.replace('[[text]]', tweet.data.text)
-  return sanitize(filename) + '.md'
+  return sanitizeFilename(filename) + '.md'
 }
 
 /**
