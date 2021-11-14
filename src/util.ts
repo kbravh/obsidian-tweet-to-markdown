@@ -3,6 +3,7 @@ import {Media, Poll, Tweet} from './models'
 import {DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TTMSettings} from './settings'
+import {unicodeSubstring} from './unicodeSubstring'
 
 /**
  * Parses out the tweet ID from the URL the user provided
@@ -93,6 +94,12 @@ const reservedRe = /^\.+$/
 const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i
 const windowsTrailingRe = /[. ]+$/
 
+/**
+ * Sanitize a filename to remove any illegal characters.
+ * Also keeps the filename to 255 bytes or below.
+ * @param filename string
+ * @returns string
+ */
 export const sanitizeFilename = (filename: string): string => {
   filename = filename
     .replace(illegalRe, '')
@@ -100,7 +107,21 @@ export const sanitizeFilename = (filename: string): string => {
     .replace(reservedRe, '')
     .replace(windowsReservedRe, '')
     .replace(windowsTrailingRe, '')
-  return filename
+  return truncateBytewise(filename, 252)
+}
+
+/**
+ * Truncate a string to a specified number of bytes
+ * @param string the string to truncate
+ * @param length the maximum length in bytes of the trimmed string
+ * @returns string
+ */
+export const truncateBytewise = (string: string, length: number): string => {
+  const originalLength = length
+  while (new TextEncoder().encode(string).length > originalLength) {
+    string = unicodeSubstring(string, 0, length--)
+  }
+  return string
 }
 
 /**
