@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-tweet-to-markdown",
 	"name": "Tweet to Markdown",
-	"version": "1.1.4",
+	"version": "1.2.0",
 	"minAppVersion": "0.12.16",
 	"description": "Save tweets as Markdown files, along with their images, polls, etc.",
 	"author": "kbravh",

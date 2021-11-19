@@ -35,7 +35,7 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
     'user.fields': 'name,username,profile_image_url',
     'tweet.fields':
       'attachments,public_metrics,entities,conversation_id,referenced_tweets',
-    'media.fields': 'url',
+    'media.fields': 'url,alt_text',
     'poll.fields': 'options',
   })
 
@@ -158,14 +158,14 @@ export const createMediaElements = (
         )
         switch (medium.type) {
           case 'photo':
-            return `\n![${medium.media_key}](${filepath})`
+            return `\n![${medium.alt_text ?? medium.media_key}](${filepath})`
           default:
             break
         }
       } else {
         switch (medium.type) {
           case 'photo':
-            return `\n![${medium.media_key}](${medium.url})`
+            return `\n![${medium.alt_text ?? medium.media_key}](${medium.url})`
           default:
             break
         }

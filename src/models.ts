@@ -38,6 +38,7 @@ export interface Media {
   media_key: string
   type: 'photo' | 'gif' | 'video'
   url?: string
+  alt_text?: string
 }
 
 export interface Mention {
