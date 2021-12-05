@@ -44,6 +44,10 @@ export class TweetUrlModal extends Modal {
       .addButton(button => {
         button.setButtonText('Download Tweet')
         button.onClick(async () => {
+          if (!navigator.onLine) {
+            new Notice('You seem to be offline.')
+            return
+          }
           // error checking for kickoff
           let bearerToken
           if (Platform.isMobileApp) {

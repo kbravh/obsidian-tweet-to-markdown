@@ -75,7 +75,7 @@ Tweets are, by default, saved with the filename `[[handle]] - [[id]].md`. You ca
 |[[handle]]|The user's handle (the part that follows the @ symbol)|
 |[[name]]|The user's name|
 |[[id]]|The unique ID assigned to the tweet|
-|[[text]]|The entire text of the tweet|
+|[[text]]|The entire text of the tweet (truncated to fit OS filename length restrictions)|
 
 ### Custom File Path
 
