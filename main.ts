@@ -7,7 +7,7 @@ import {TweetUrlModal} from 'src/TweetUrlModal'
 export default class TTM extends Plugin {
   settings: TTMSettings
   currentTweet: Tweet
-  currentTweetMarkdown: string
+  currentTweetMarkdown = ''
   bearerToken: string
   tweetComplete: TweetCompleteModal
 
