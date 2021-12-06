@@ -89,6 +89,15 @@ Tweet images will be automatically saved to the directory `tweet-assets/`. If yo
 
 Nota bene: Unfortunately, there is currently not a way to retrieve gifs or videos from tweets using the v2 API.
 
+## Pasting links
+As of version 1.3.0, you can paste a Twitter link into any file and have it automatically converted to the tweet and embedded in your note. ✨
+
+![Demo of tweet link pasting](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/link_paste_demo.gif)
+
+This setting can be enabled in the plugin settings panel as **Download Tweet on paste**. Also in the settings, you can choose whether the tweet should be embedded directly as text in the current note, or if it should be linked as an Obsidian embed (`![[note title]]`).
+
+**Nota bene 📢:** If you are also using the [Auto Link Title plugin](obsidian://show-plugin?id=obsidian-auto-link-title), you may see that it picks up the pasted link first before we have a chance to process it. Unfortunately there is no way to set the order that the plugins run. A workaround is to add the letter `t` to the front of any Twitter link you want this plugin to pick up before you paste it, like this: `thttps://twitter.com/...`. This will cause Auto Link Title to ignore it so that we can process it instead. You _must_ add the `t` to the link before you paste it; you cannot type the `t` in your document then paste, because Auto Link Title will still grab it.
+
 <!-- CONTRIBUTING -->
 
 ## Contributing
