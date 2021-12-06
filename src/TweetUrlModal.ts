@@ -58,6 +58,11 @@ export class TweetUrlModal extends Modal {
               process.env.TWITTER_BEARER_TOKEN ||
               ''
           }
+          if (!bearerToken) {
+            new Notice('Bearer token was not found.')
+            return
+          }
+
           if (!this.url) {
             new Notice('No tweet link provided.')
             return
@@ -67,11 +72,6 @@ export class TweetUrlModal extends Modal {
             id = getTweetID(this.url)
           } catch (error) {
             new Notice(error.message)
-            return
-          }
-
-          if (!bearerToken) {
-            new Notice('Bearer token was not found.')
             return
           }
 

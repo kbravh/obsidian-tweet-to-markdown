@@ -7,6 +7,8 @@ export interface TTMSettings {
   downloadAssets: boolean
   assetLocation: string | null
   filename: string | null
+  tweetLinkFetch: boolean
+  embedMethod: 'text' | 'obsidian'
 }
 
 export const DEFAULT_SETTINGS: TTMSettings = {
@@ -15,6 +17,8 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   downloadAssets: false,
   assetLocation: '',
   filename: null,
+  tweetLinkFetch: false,
+  embedMethod: 'obsidian',
 }
 
 export class TTMSettingTab extends PluginSettingTab {
@@ -98,6 +102,38 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.filename)
           .onChange(async value => {
             this.plugin.settings.filename = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Download Tweet on paste')
+      .setDesc(
+        'Automatically download and embed a tweet when pasting a twitter link.'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.tweetLinkFetch)
+          .onChange(async value => {
+            this.plugin.settings.tweetLinkFetch = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Pasted Tweet embed method')
+      .setDesc(
+        'Determines if a pasted tweet will be embedded directly into the file or linked with an Obsidian embed.'
+      )
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions({
+            text: 'Direct text embed',
+            obsidian: 'Obsidian embed',
+          })
+          .setValue(this.plugin.settings.embedMethod)
+          .onChange(async (value: 'text' | 'obsidian') => {
+            this.plugin.settings.embedMethod = value
             await this.plugin.saveSettings()
           })
       )

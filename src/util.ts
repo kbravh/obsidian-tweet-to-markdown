@@ -1,9 +1,19 @@
-import {App, normalizePath, request, TAbstractFile} from 'obsidian'
+import {
+  App,
+  Editor,
+  MarkdownView,
+  normalizePath,
+  Notice,
+  Platform,
+  request,
+  TAbstractFile,
+} from 'obsidian'
+import {createDownloadManager, DownloadManager} from './downloadManager'
 import {Media, Poll, Tweet} from './models'
-import {DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TTMSettings} from './settings'
 import {unicodeSubstring} from './unicodeSubstring'
+import {v4 as uuid} from 'uuid'
 
 /**
  * Parses out the tweet ID from the URL the user provided
@@ -182,7 +192,7 @@ export const buildMarkdown = async (
   plugin: TTM,
   downloadManager: DownloadManager,
   tweet: Tweet,
-  type: 'normal' | 'thread' | 'quoted' = 'normal'
+  type: 'normal' | 'embed' | 'thread' | 'quoted' = 'normal'
 ): Promise<string> => {
   let metrics: string[] = []
   metrics = [
@@ -304,6 +314,8 @@ export const buildMarkdown = async (
   switch (type) {
     case 'normal':
       return frontmatter.concat(markdown).join('\n')
+    case 'embed':
+      return markdown.join('\n')
     case 'thread':
       return '\n\n---\n\n' + markdown.join('\n')
     case 'quoted':
@@ -364,6 +376,140 @@ export const downloadImages = (
       )
     })
   )
+}
+
+export const pasteTweet = async (
+  event: ClipboardEvent,
+  editor: Editor,
+  markdownView: MarkdownView,
+  plugin: TTM
+): Promise<void> => {
+  // early escapes
+  if (!plugin.settings.tweetLinkFetch) return // feature disabled
+  if (!navigator.onLine) return // offline
+  if (event.defaultPrevented) return // paste already handled
+
+  const clipboardText = event.clipboardData.getData('text/plain')
+
+  // determine if it's a Twitter URL
+  if (!isTwitterUrl(clipboardText)) return
+  let id = ''
+  try {
+    id = getTweetID(clipboardText)
+  } catch (error) {
+    return
+  }
+
+  // if it is a Tweet link, check for bearer token
+  let bearerToken
+  if (Platform.isMobileApp) {
+    bearerToken = plugin.settings.bearerToken || ''
+  } else {
+    bearerToken =
+      plugin.settings.bearerToken || process.env.TWITTER_BEARER_TOKEN || ''
+  }
+  if (!bearerToken) {
+    new Notice('Twitter bearer token was not found.')
+    return
+  }
+  plugin.bearerToken = bearerToken
+
+  // determine if the user is pasting into a spot we don't want to interfere
+  if (isInMarkdownLink(editor) || isInQuote(editor)) return
+
+  // We've decided to handle the paste, stop propagation to the default handler.
+  event.preventDefault()
+  const placeholder = `Fetching tweet ${id}...`
+  editor.replaceSelection(placeholder)
+
+  const downloadManager = createDownloadManager()
+  try {
+    plugin.currentTweet = await getTweet(id, bearerToken)
+  } catch (error) {
+    let text = editor.getValue()
+    text = text.replace(placeholder, `Error retrieving tweet: ${clipboardText}`)
+    editor.setValue(text)
+  }
+
+  const markdown = await buildMarkdown(
+    plugin.app,
+    plugin,
+    downloadManager,
+    plugin.currentTweet,
+    'embed'
+  )
+
+  plugin.currentTweetMarkdown = markdown + plugin.currentTweetMarkdown
+
+  await downloadManager
+    .finishDownloads()
+    .then(results => {
+      if (results.length) {
+        new Notice('Images downloaded')
+      }
+    })
+    .catch(error => {
+      new Notice('There was an error downloading the images.')
+      console.error(error)
+    })
+
+  // embed the processed tweet
+  let text = editor.getValue()
+
+  if (plugin.settings.embedMethod === 'text') {
+    text = text.replace(placeholder, plugin.currentTweetMarkdown)
+  } else {
+    let filename = createFilename(plugin.currentTweet, plugin.settings.filename)
+    const fileExists = doesFileExist(
+      plugin.app,
+      `${plugin.settings.noteLocation}/${filename}`
+    )
+    if (fileExists) {
+      // just unique-ify the title for now
+      filename = `${uuid().substring(0, 8)}-${filename}`
+    }
+    if (plugin.settings.noteLocation) {
+      // create the directory
+      const doesFolderExist = await plugin.app.vault.adapter.exists(
+        plugin.settings.noteLocation
+      )
+      if (!doesFolderExist) {
+        await plugin.app.vault
+          .createFolder(plugin.settings.noteLocation)
+          .catch(error => {
+            new Notice('Error creating tweet directory.')
+            console.error(
+              'There was an error creating the tweet directory.',
+              error
+            )
+          })
+      }
+    }
+    await plugin.app.vault.create(
+      `${plugin.settings.noteLocation}/${filename}`,
+      plugin.currentTweetMarkdown
+    )
+    text = text.replace(placeholder, `![[${filename}]]`)
+  }
+
+  editor.setValue(text)
+  // cleanup
+  plugin.currentTweet = null
+  plugin.currentTweetMarkdown = ''
+}
+
+export const isTwitterUrl = (text: string): boolean =>
+  /^http?s:\/\/twitter.com\/\w+\/status\/\w+/.test(text)
+
+export const isInMarkdownLink = (editor: Editor): boolean => {
+  const {ch, line} = editor.getCursor()
+  const preceding = editor.getRange({ch: ch - 2, line}, {ch, line})
+  return preceding === ')['
+}
+export const isInQuote = (editor: Editor): boolean => {
+  const {ch, line} = editor.getCursor()
+  const preceding = editor.getRange({ch: ch - 1, line}, {ch, line})
+  return /["'`]/.test(preceding)
 }
 
 export const doesFileExist = (app: App, filepath: string): boolean => {

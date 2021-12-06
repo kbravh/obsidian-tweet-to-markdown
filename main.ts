@@ -1,8 +1,13 @@
-import {addIcon, Plugin} from 'obsidian'
+import {addIcon, Editor, MarkdownView, Plugin} from 'obsidian'
 import {DEFAULT_SETTINGS, TTMSettings, TTMSettingTab} from 'src/settings'
+import {pasteTweet} from 'src/util'
 import {Tweet} from 'src/models'
 import {TweetCompleteModal} from 'src/TweetCompleteModal'
 import {TweetUrlModal} from 'src/TweetUrlModal'
+
+interface PasteFunction {
+  (this: Plugin, ev: ClipboardEvent): void
+}
 
 export default class TTM extends Plugin {
   settings: TTMSettings
@@ -10,9 +15,10 @@ export default class TTM extends Plugin {
   currentTweetMarkdown = ''
   bearerToken: string
   tweetComplete: TweetCompleteModal
+  pasteFunction: PasteFunction
 
   async onload(): Promise<void> {
-    console.info('loading ttm')
+    console.info('Loading Tweet to Markdown')
 
     addIcon(
       'twitter',
@@ -33,7 +39,18 @@ export default class TTM extends Plugin {
       await this.saveSettings()
     }
 
-    // add twitter icon with a delay so it won't end up first
+    const pasteTweetWrapper = (
+      event: ClipboardEvent,
+      editor: Editor,
+      markdownView: MarkdownView
+    ): Promise<void> => {
+      return pasteTweet(event, editor, markdownView, this)
+    }
+
+    // add link paste event listener
+    this.app.workspace.on('editor-paste', pasteTweetWrapper, this)
+
+    // add twitter icon
     this.addRibbonIcon('twitter', 'Tweet to Markdown', () => {
       new TweetUrlModal(this.app, this).open()
     })
@@ -47,6 +64,10 @@ export default class TTM extends Plugin {
     })
 
     this.addSettingTab(new TTMSettingTab(this.app, this))
+  }
+
+  onunload(): void {
+    console.info('unloading Tweet to Markdown')
   }
 
   async loadSettings(): Promise<void> {
