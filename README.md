@@ -32,6 +32,8 @@ Or, if you'd like to install it manually, clone this repository to the `.obsidia
 
 ## Usage
 
+**Heads up! 📢:** As of right now, you need to set up a Twitter bearer token to use this plugin. However, I'm working on another option so that you won't have to go through that hassle. Keep your eyes peeled for version 2.0.0 😎
+
 ### Bearer token
 To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
