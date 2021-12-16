@@ -311,6 +311,12 @@ export const buildMarkdown = async (
     markdown = markdown.map(line => '> ' + line)
   }
 
+  // add original tweet link to end of tweet
+  markdown.push(
+    '\n\n' +
+      `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
+  )
+
   switch (type) {
     case 'normal':
       return frontmatter.concat(markdown).join('\n')
