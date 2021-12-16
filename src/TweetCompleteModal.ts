@@ -63,6 +63,10 @@ export class TweetCompleteModal extends Modal {
           }
         }
 
+        // clean up excessive newlines
+        this.plugin.currentTweetMarkdown =
+          this.plugin.currentTweetMarkdown.replace(/\n{2,}/g, '\n\n')
+
         // write the note to file
         await this.app.vault.create(
           `${this.plugin.settings.noteLocation}/${filename}`,
