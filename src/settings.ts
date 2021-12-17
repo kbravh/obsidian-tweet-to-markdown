@@ -9,6 +9,7 @@ export interface TTMSettings {
   filename: string | null
   tweetLinkFetch: boolean
   embedMethod: 'text' | 'obsidian'
+  avatars: boolean
 }
 
 export const DEFAULT_SETTINGS: TTMSettings = {
@@ -19,6 +20,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   filename: null,
   tweetLinkFetch: false,
   embedMethod: 'obsidian',
+  avatars: true,
 }
 
 export class TTMSettingTab extends PluginSettingTab {
@@ -64,6 +66,18 @@ export class TTMSettingTab extends PluginSettingTab {
             this.plugin.settings.noteLocation = value
             await this.plugin.saveSettings()
           })
+      )
+
+    new Setting(containerEl)
+      .setName('Include profile pictures')
+      .setDesc(
+        'Whether to include the profile image of the tweet author in the saved tweet.'
+      )
+      .addToggle(toggle =>
+        toggle.setValue(this.plugin.settings.avatars).onChange(async value => {
+          this.plugin.settings.avatars = value
+          await this.plugin.saveSettings()
+        })
       )
 
     new Setting(containerEl)

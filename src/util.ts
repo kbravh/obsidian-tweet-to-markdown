@@ -254,16 +254,21 @@ export const buildMarkdown = async (
   ]
 
   const assetPath = plugin.settings.assetLocation || 'assets'
-  let markdown = [
-    `![${user.username}](${
-      plugin.settings.downloadAssets
-        ? normalizePath(`${assetPath}/${user.username}-${user.id}.jpg`)
-        : user.profile_image_url
-    })`, // profile image
+  let markdown = []
+  if (plugin.settings.avatars) {
+    markdown.push(
+      `![${user.username}](${
+        plugin.settings.downloadAssets
+          ? normalizePath(`${assetPath}/${user.username}-${user.id}.jpg`)
+          : user.profile_image_url
+      })` // profile image
+    )
+  }
+  markdown.push(
     `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
     '\n',
-    `${text}`, // text of the tweet
-  ]
+    `${text}`
+  ) // text of the tweet
 
   // markdown requires 2 line breaks for actual new lines
   markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
@@ -281,12 +286,7 @@ export const buildMarkdown = async (
 
   // download images
   if (plugin.settings.downloadAssets) {
-    downloadImages(
-      app,
-      downloadManager,
-      tweet,
-      plugin.settings.assetLocation || 'assets'
-    )
+    downloadImages(app, downloadManager, tweet, plugin)
   }
 
   // check for quoted tweets to be included
@@ -335,18 +335,22 @@ export const downloadImages = (
   app: App,
   downloadManager: DownloadManager,
   tweet: Tweet,
-  assetLocation = 'assets'
+  plugin: TTM
 ): void => {
+  const assetLocation = plugin.settings.assetLocation || 'assets'
   const user = tweet.includes.users[0]
 
   // create the image folder
   app.vault.createFolder(assetLocation).catch(() => {})
 
   let filesToDownload = []
-  filesToDownload.push({
-    url: user.profile_image_url,
-    title: `${user.username}-${user.id}.jpg`,
-  })
+
+  if (plugin.settings.avatars) {
+    filesToDownload.push({
+      url: user.profile_image_url,
+      title: `${user.username}-${user.id}.jpg`,
+    })
+  }
 
   tweet.includes?.media?.forEach((medium: Media) => {
     switch (medium.type) {
