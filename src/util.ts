@@ -242,8 +242,9 @@ export const buildMarkdown = async (
       })
   }
 
-  const date = moment(tweet.data.created_at).format(plugin.settings.dateFormat)
-
+  const date = moment(tweet.data.created_at)
+    .locale(plugin.settings.dateLocale)
+    .format(plugin.settings.dateFormat)
   /**
    * Define the frontmatter as the name, handle, and source url
    */

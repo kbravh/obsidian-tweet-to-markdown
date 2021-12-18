@@ -1,4 +1,4 @@
-import {App, Platform, PluginSettingTab, Setting} from 'obsidian'
+import {App, moment, Platform, PluginSettingTab, Setting} from 'obsidian'
 import TTM from 'main'
 
 export interface TTMSettings {
@@ -11,6 +11,7 @@ export interface TTMSettings {
   embedMethod: 'text' | 'obsidian'
   avatars: boolean
   dateFormat: string
+  dateLocale: string
 }
 
 export const DEFAULT_SETTINGS: TTMSettings = {
@@ -23,10 +24,14 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   embedMethod: 'obsidian',
   avatars: true,
   dateFormat: 'LLL',
+  dateLocale: 'en',
 }
 
 export class TTMSettingTab extends PluginSettingTab {
   plugin: TTM
+  locales = moment
+    .locales()
+    .reduce((obj, locale) => ({...obj, [locale]: locale}), {})
 
   constructor(app: App, plugin: TTM) {
     super(app, plugin)
@@ -164,6 +169,19 @@ export class TTMSettingTab extends PluginSettingTab {
           .onChange(async value => {
             this.plugin.settings.dateFormat =
               value || DEFAULT_SETTINGS.dateFormat
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Date locale')
+      .setDesc('The locale to apply to the date format')
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions(this.locales)
+          .setValue(this.plugin.settings.dateLocale)
+          .onChange(async value => {
+            this.plugin.settings.dateLocale = value
             await this.plugin.saveSettings()
           })
       )

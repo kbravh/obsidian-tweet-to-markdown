@@ -20,6 +20,6 @@ export default {
     exports: 'default',
     banner,
   },
-  external: ['obsidian', 'moment'],
+  external: ['obsidian'],
   plugins: [typescript(), nodeResolve({browser: true}), commonjs()],
 }

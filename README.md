@@ -98,7 +98,7 @@ There are some options to customize the output of the note.
 By default, the tweet author's profile picture will be included with the downloaded tweet. To exclude it, disable the **Include profile pictures** in the plugin settings.
 
 ### Date format
-To customize the format that the date is saved when downloading a tweet, you can provide a format string in the plugin settings. These format strings can be found in the [Moment.js docs](https://momentjs.com/docs/#/displaying/format/). By default, the format is `LLL`, which produces a date like `September 4, 1986 8:30 PM`.
+To customize the format that the date is saved when downloading a tweet, you can provide a format string in the plugin settings. These format strings can be found in the [Moment.js docs](https://momentjs.com/docs/#/displaying/format/). You can also set your locale, which defaults to `en`. By default the format is `LLL`, which produces a date like `September 4, 1986 8:30 PM` with the `en` locale.
 
 ## Pasting links
 As of version 1.3.0, you can paste a Twitter link into any file and have it automatically converted to the tweet and embedded in your note. ✨
