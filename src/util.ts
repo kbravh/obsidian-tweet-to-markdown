@@ -10,6 +10,7 @@ import {
 } from 'obsidian'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import {Media, Poll, Tweet} from './models'
+import {moment} from 'obsidian'
 import TTM from 'main'
 import {TTMSettings} from './settings'
 import {unicodeSubstring} from './unicodeSubstring'
@@ -44,7 +45,7 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
     expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
     'user.fields': 'name,username,profile_image_url',
     'tweet.fields':
-      'attachments,public_metrics,entities,conversation_id,referenced_tweets',
+      'attachments,public_metrics,entities,conversation_id,referenced_tweets,created_at',
     'media.fields': 'url,alt_text',
     'poll.fields': 'options',
   })
@@ -241,6 +242,8 @@ export const buildMarkdown = async (
       })
   }
 
+  const date = moment(tweet.data.created_at).format(plugin.settings.dateFormat)
+
   /**
    * Define the frontmatter as the name, handle, and source url
    */
@@ -249,6 +252,7 @@ export const buildMarkdown = async (
     `author: "${user.name}"`,
     `handle: "@${user.username}"`,
     `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
+    `date: "${date}"`,
     ...metrics,
     '---',
   ]
@@ -265,7 +269,7 @@ export const buildMarkdown = async (
     )
   }
   markdown.push(
-    `${user.name} ([@${user.username}](https://twitter.com/${user.username}))`, // name and handle
+    `${user.name} ([@${user.username}](https://twitter.com/${user.username})) - ${date}`, // name, handle, and date
     '\n',
     `${text}`
   ) // text of the tweet

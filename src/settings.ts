@@ -10,6 +10,7 @@ export interface TTMSettings {
   tweetLinkFetch: boolean
   embedMethod: 'text' | 'obsidian'
   avatars: boolean
+  dateFormat: string
 }
 
 export const DEFAULT_SETTINGS: TTMSettings = {
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   tweetLinkFetch: false,
   embedMethod: 'obsidian',
   avatars: true,
+  dateFormat: 'LLL',
 }
 
 export class TTMSettingTab extends PluginSettingTab {
@@ -66,18 +68,6 @@ export class TTMSettingTab extends PluginSettingTab {
             this.plugin.settings.noteLocation = value
             await this.plugin.saveSettings()
           })
-      )
-
-    new Setting(containerEl)
-      .setName('Include profile pictures')
-      .setDesc(
-        'Whether to include the profile image of the tweet author in the saved tweet.'
-      )
-      .addToggle(toggle =>
-        toggle.setValue(this.plugin.settings.avatars).onChange(async value => {
-          this.plugin.settings.avatars = value
-          await this.plugin.saveSettings()
-        })
       )
 
     new Setting(containerEl)
@@ -148,6 +138,32 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.embedMethod)
           .onChange(async (value: 'text' | 'obsidian') => {
             this.plugin.settings.embedMethod = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Include profile pictures')
+      .setDesc(
+        'Whether to include the profile image of the tweet author in the saved tweet.'
+      )
+      .addToggle(toggle =>
+        toggle.setValue(this.plugin.settings.avatars).onChange(async value => {
+          this.plugin.settings.avatars = value
+          await this.plugin.saveSettings()
+        })
+      )
+
+    new Setting(containerEl)
+      .setName('Date Format')
+      .setDesc('The format to display the tweet timestamp.')
+      .addMomentFormat(format =>
+        format
+          .setDefaultFormat(this.plugin.settings.dateFormat)
+          .setValue(this.plugin.settings.dateFormat)
+          .onChange(async value => {
+            this.plugin.settings.dateFormat =
+              value || DEFAULT_SETTINGS.dateFormat
             await this.plugin.saveSettings()
           })
       )

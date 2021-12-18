@@ -14,6 +14,7 @@ export interface Attachment {
 export interface Data {
   id: string
   text: string
+  created_at: string
   author_id: string
   public_metrics: Metrics
   entities?: Entities
