@@ -514,7 +514,7 @@ export const pasteTweet = async (
 }
 
 export const isTwitterUrl = (text: string): boolean =>
-  /^t?http?s:\/\/twitter.com\/\w+\/status\/\w+/i.test(text)
+  /^t?https?:\/\/(mobile\.)?twitter.com\/\w+\/status\/\w+/i.test(text)
 
 export const isInMarkdownLink = (editor: Editor): boolean => {
   const {ch, line} = editor.getCursor()
