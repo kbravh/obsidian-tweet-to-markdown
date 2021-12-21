@@ -322,6 +322,11 @@ export const buildMarkdown = async (
       `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
   )
 
+  // convert mobile.twitter.com links to regular links since they'll redirect anyway
+  markdown = markdown.map(line =>
+    line.replace(/https?:\/\/mobile.twitter.com/g, 'https://twitter.com')
+  )
+
   switch (type) {
     case 'normal':
       return frontmatter.concat(markdown).join('\n')
