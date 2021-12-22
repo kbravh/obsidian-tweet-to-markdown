@@ -461,6 +461,12 @@ export const pasteTweet = async (
 
   plugin.currentTweetMarkdown = markdown + plugin.currentTweetMarkdown
 
+  // clean up excessive newlines
+  plugin.currentTweetMarkdown = plugin.currentTweetMarkdown.replace(
+    /\n{2,}/g,
+    '\n\n'
+  )
+
   await downloadManager
     .finishDownloads()
     .then(results => {
