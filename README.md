@@ -24,7 +24,7 @@ This plugin allows you to quickly save a tweet in Markdown format. It is built o
 
 ## Installing
 
-Find this plugin in the listing of community plugins in Obsidian and add it to your application.
+Find this plugin in the listing of community plugins in Obsidian and add it to your application. You can use [this link](obsidian://show-plugin?id=obsidian-tweet-to-markdown).
 
 Or, if you'd like to install it manually, clone this repository to the `.obsidian/plugins/` directory in your vault, navigate to your newly cloned folder, run `npm i` or `yarn` to install dependencies, and run `npm run build` or `yarn build` to compile the plugin.
 
