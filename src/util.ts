@@ -33,13 +33,23 @@ export const getTweetID = (src: string): string => {
   return id
 }
 
+export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
+  if (bearer.startsWith('TTM>')) {
+    return getTweetFromTTM(id, bearer)
+  }
+  return getTweetFromTwitter(id, bearer)
+}
+
 /**
  * Fetches a tweet object from the Twitter v2 API
  * @param {string} id - The ID of the tweet to fetch from the API
  * @param {string} bearer - The bearer token
  * @returns {Tweet} - The tweet from the Twitter API
  */
-export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
+const getTweetFromTwitter = async (
+  id: string,
+  bearer: string
+): Promise<Tweet> => {
   const twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
   const params = new URLSearchParams({
     expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
@@ -76,6 +86,33 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
         throw new Error('There seems to be a problem with your bearer token.')
     }
   }
+  return tweet
+}
+
+/**
+ * Fetches a tweet object from the TTM service API
+ * @param {string} id - The ID of the tweet to fetch from the API
+ * @param {string} bearer - The bearer token
+ * @returns {Promise<Tweet>} - The tweet from the Twitter API
+ */
+const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
+  const ttmUrl = new URL('https://ttm.kbravh.dev/api/tweet')
+  const params = new URLSearchParams({
+    tweet: id,
+  })
+  let tweetRequest
+  try {
+    tweetRequest = await request({
+      method: 'GET',
+      url: `${ttmUrl.href}?${params.toString()}`,
+      headers: {Authorization: `Bearer ${bearer}`},
+    })
+  } catch (error) {
+    if (error.request) {
+      throw new Error(error.request)
+    }
+  }
+  const tweet: Tweet = JSON.parse(tweetRequest)
   return tweet
 }
 
