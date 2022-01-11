@@ -1,3 +1,4 @@
+import 'core-js/actual/array/flat-map'
 import {
   App,
   Editor,
@@ -275,8 +276,8 @@ export const buildMarkdown = async (
     `${text}`
   ) // text of the tweet
 
-  // markdown requires 2 line breaks for actual new lines
-  markdown = markdown.map(line => line.replace(/\n/g, '\n\n'))
+  // remove newlines from within tweet text to avoid breaking our formatting
+  markdown = markdown.flatMap(line => line.split('\n'))
 
   // Add in other tweet elements
   if (tweet.includes?.polls) {
@@ -306,21 +307,22 @@ export const buildMarkdown = async (
           subtweet,
           'quoted'
         )
-        markdown.push('\n\n' + subtweet_text)
+        markdown.push('', '', subtweet_text)
       }
     }
   }
+
+  // add original tweet link to end of tweet
+  markdown.push(
+    '',
+    '',
+    `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
+  )
 
   // indent all lines for a quoted tweet
   if (type === 'quoted') {
     markdown = markdown.map(line => '> ' + line)
   }
-
-  // add original tweet link to end of tweet
-  markdown.push(
-    '\n\n' +
-      `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
-  )
 
   // convert mobile.twitter.com links to regular links since they'll redirect anyway
   markdown = markdown.map(line =>
