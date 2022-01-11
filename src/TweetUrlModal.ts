@@ -55,6 +55,7 @@ export class TweetUrlModal extends Modal {
           } else {
             bearerToken =
               this.plugin.settings.bearerToken ||
+              process.env.TTM_API_KEY ||
               process.env.TWITTER_BEARER_TOKEN ||
               ''
           }

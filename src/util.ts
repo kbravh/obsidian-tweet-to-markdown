@@ -463,7 +463,10 @@ export const pasteTweet = async (
     bearerToken = plugin.settings.bearerToken || ''
   } else {
     bearerToken =
-      plugin.settings.bearerToken || process.env.TWITTER_BEARER_TOKEN || ''
+      plugin.settings.bearerToken ||
+      process.env.TTM_API_KEY ||
+      process.env.TWITTER_BEARER_TOKEN ||
+      ''
   }
   if (!bearerToken) {
     new Notice('Twitter bearer token was not found.')
