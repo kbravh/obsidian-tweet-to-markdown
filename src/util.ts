@@ -102,9 +102,8 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
   })
   let tweetRequest
   try {
-    tweetRequest = await request({
+    tweetRequest = await fetch(`${ttmUrl.href}?${params.toString()}`, {
       method: 'GET',
-      url: `${ttmUrl.href}?${params.toString()}`,
       headers: {Authorization: `Bearer ${bearer}`},
     })
   } catch (error) {
@@ -112,7 +111,12 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
       throw new Error(error.request)
     }
   }
-  const tweet: Tweet = JSON.parse(tweetRequest)
+
+  if (tweetRequest.status !== 200) {
+    throw new Error(tweetRequest.statusText)
+  }
+
+  const tweet: Tweet = await tweetRequest.json()
   return tweet
 }
 

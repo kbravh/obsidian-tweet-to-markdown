@@ -67,7 +67,6 @@ export class TTMSettingTab extends PluginSettingTab {
       )
       .addText(text =>
         text
-          .setPlaceholder('tweets/')
           .setValue(this.plugin.settings.noteLocation)
           .onChange(async value => {
             this.plugin.settings.noteLocation = value
