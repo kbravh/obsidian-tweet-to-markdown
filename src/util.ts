@@ -107,13 +107,12 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
       headers: {Authorization: `Bearer ${bearer}`},
     })
   } catch (error) {
-    if (error.request) {
-      throw new Error(error.request)
-    }
+    throw new Error(error)
   }
 
-  if (tweetRequest.status !== 200) {
-    throw new Error(tweetRequest.statusText)
+  if (!tweetRequest.ok || tweetRequest.status !== 200) {
+    const message = await tweetRequest.text()
+    throw new Error(message)
   }
 
   const tweet: Tweet = await tweetRequest.json()
