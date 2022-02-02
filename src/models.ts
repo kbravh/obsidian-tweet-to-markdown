@@ -89,6 +89,7 @@ export interface Tweet {
   errors?: Error[]
   // other error fields
   reason?: string
+  status?: number
 }
 
 export interface TweetURL {

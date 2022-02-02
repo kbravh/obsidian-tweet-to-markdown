@@ -79,6 +79,9 @@ const getTweetFromTwitter = async (
   if (tweet.errors) {
     throw new Error(tweet.errors[0].detail)
   }
+  if (tweet?.status === 401) {
+    throw new Error('There seems to be a problem with your bearer token.')
+  }
   if (tweet?.reason) {
     switch (tweet.reason) {
       case 'client-not-enrolled':
@@ -116,6 +119,7 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
   }
 
   const tweet: Tweet = await tweetRequest.json()
+
   return tweet
 }
 
