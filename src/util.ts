@@ -343,13 +343,18 @@ export const buildMarkdown = async (
     for (const subtweet_ref of tweet.data?.referenced_tweets) {
       if (subtweet_ref?.type === 'quoted') {
         const subtweet = await getTweet(subtweet_ref.id, plugin.bearerToken)
-        const subtweet_text = await buildMarkdown(
-          app,
-          plugin,
-          downloadManager,
-          subtweet,
-          'quoted'
-        )
+        let subtweet_text
+        try {
+          subtweet_text = await buildMarkdown(
+            app,
+            plugin,
+            downloadManager,
+            subtweet,
+            'quoted'
+          )
+        } catch (error) {
+          new Notice('There was a problem processing the downloaded tweet')
+        }
         markdown.push('\n\n' + subtweet_text)
       }
     }
@@ -498,13 +503,18 @@ export const pasteTweet = async (
     editor.setValue(text)
   }
 
-  const markdown = await buildMarkdown(
-    plugin.app,
-    plugin,
-    downloadManager,
-    plugin.currentTweet,
-    'embed'
-  )
+  let markdown
+  try {
+    markdown = await buildMarkdown(
+      plugin.app,
+      plugin,
+      downloadManager,
+      plugin.currentTweet,
+      'embed'
+    )
+  } catch (error) {
+    new Notice('There was a problem processing the downloaded tweet')
+  }
 
   plugin.currentTweetMarkdown = markdown + plugin.currentTweetMarkdown
 

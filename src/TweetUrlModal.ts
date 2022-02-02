@@ -103,13 +103,20 @@ export class TweetUrlModal extends Modal {
               this.plugin.currentTweet.data.conversation_id !==
               this.plugin.currentTweet.data.id
             ) {
-              const markdown = await buildMarkdown(
-                this.app,
-                this.plugin,
-                this.downloadManager,
-                this.plugin.currentTweet,
-                'thread'
-              )
+              let markdown
+              try {
+                markdown = await buildMarkdown(
+                  this.app,
+                  this.plugin,
+                  this.downloadManager,
+                  this.plugin.currentTweet,
+                  'thread'
+                )
+              } catch (error) {
+                new Notice(
+                  'There was a problem processing the downloaded tweet'
+                )
+              }
               this.plugin.currentTweetMarkdown =
                 markdown + this.plugin.currentTweetMarkdown
               // load in parent tweet
@@ -124,12 +131,17 @@ export class TweetUrlModal extends Modal {
             }
           }
 
-          const markdown = await buildMarkdown(
-            this.app,
-            this.plugin,
-            this.downloadManager,
-            this.plugin.currentTweet
-          )
+          let markdown
+          try {
+            markdown = await buildMarkdown(
+              this.app,
+              this.plugin,
+              this.downloadManager,
+              this.plugin.currentTweet
+            )
+          } catch (error) {
+            new Notice('There was a problem processing the downloaded tweet')
+          }
           this.plugin.currentTweetMarkdown =
             markdown + this.plugin.currentTweetMarkdown
 
