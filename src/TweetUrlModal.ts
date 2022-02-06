@@ -1,5 +1,5 @@
-import {App, Modal, Notice, Platform, Setting} from 'obsidian'
-import {buildMarkdown, getTweet, getTweetID} from './util'
+import {App, Modal, Notice, Setting} from 'obsidian'
+import {buildMarkdown, getBearerToken, getTweet, getTweetID} from './util'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TweetCompleteModal} from './TweetCompleteModal'
@@ -49,16 +49,7 @@ export class TweetUrlModal extends Modal {
             return
           }
           // error checking for kickoff
-          let bearerToken
-          if (Platform.isMobileApp) {
-            bearerToken = this.plugin.settings.bearerToken || ''
-          } else {
-            bearerToken =
-              this.plugin.settings.bearerToken ||
-              process.env.TTM_API_KEY ||
-              process.env.TWITTER_BEARER_TOKEN ||
-              ''
-          }
+          const bearerToken = getBearerToken(this.plugin)
           if (!bearerToken) {
             new Notice('Bearer token was not found.')
             return

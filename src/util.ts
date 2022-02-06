@@ -470,16 +470,7 @@ export const pasteTweet = async (
   }
 
   // if it is a Tweet link, check for bearer token
-  let bearerToken
-  if (Platform.isMobileApp) {
-    bearerToken = plugin.settings.bearerToken || ''
-  } else {
-    bearerToken =
-      plugin.settings.bearerToken ||
-      process.env.TTM_API_KEY ||
-      process.env.TWITTER_BEARER_TOKEN ||
-      ''
-  }
+  const bearerToken = getBearerToken(plugin)
   if (!bearerToken) {
     new Notice('Twitter bearer token was not found.')
     return
@@ -605,4 +596,17 @@ export const doesFileExist = (app: App, filepath: string): boolean => {
     return false
   }
   return !!file
+}
+
+export const getBearerToken = (plugin: TTM): string => {
+  if (Platform.isMobileApp) {
+    return plugin.settings.bearerToken || ''
+  } else {
+    return (
+      plugin.settings.bearerToken ||
+      process.env.TTM_API_KEY ||
+      process.env.TWITTER_BEARER_TOKEN ||
+      ''
+    )
+  }
 }
