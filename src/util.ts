@@ -505,6 +505,8 @@ export const pasteTweet = async (
     )
   } catch (error) {
     new Notice('There was a problem processing the downloaded tweet')
+    plugin.currentTweet = null
+    return
   }
 
   plugin.currentTweetMarkdown = markdown + plugin.currentTweetMarkdown
