@@ -13,6 +13,7 @@ export default class TTM extends Plugin {
   settings: TTMSettings
   currentTweet: Tweet
   currentTweetMarkdown = ''
+  threadCount = 0
   bearerToken: string
   tweetComplete: TweetCompleteModal
   pasteFunction: PasteFunction

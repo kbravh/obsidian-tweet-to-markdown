@@ -77,6 +77,9 @@ export class TweetUrlModal extends Modal {
 
           this.downloadManager = createDownloadManager()
 
+          // reset thread count
+          this.plugin.threadCount = 0
+
           // set the button as loading
           button.setButtonText('Loading...')
           button.setDisabled(true)
@@ -86,12 +89,13 @@ export class TweetUrlModal extends Modal {
             this.plugin.currentTweet = await getTweet(id, bearerToken)
           } catch (error) {
             new Notice(error.message)
-            // set the button as loading
+            // set the button as not loading
             button.setButtonText('Download Tweet')
             button.setDisabled(false)
             return
           }
           this.plugin.currentTweetMarkdown = ''
+          button.setButtonText(`${++this.plugin.threadCount} tweet fetched...`)
 
           // special handling for threads
           if (this.thread) {
@@ -113,7 +117,7 @@ export class TweetUrlModal extends Modal {
                 new Notice(
                   'There was a problem processing the downloaded tweet'
                 )
-                // set the button as loading
+                // set the button as not loading
                 button.setButtonText('Download Tweet')
                 button.setDisabled(false)
                 return
@@ -130,6 +134,9 @@ export class TweetUrlModal extends Modal {
                   parent_tweet.id,
                   bearerToken
                 )
+                button.setButtonText(
+                  `${++this.plugin.threadCount} tweets fetched...`
+                )
               } catch (error) {
                 if (
                   error.message.includes(
@@ -143,7 +150,7 @@ export class TweetUrlModal extends Modal {
                   new Notice(error.message)
                 }
                 tweetStateCleanup(this.plugin)
-                // set the button as loading
+                // set the button as not loading
                 button.setButtonText('Download Tweet')
                 button.setDisabled(false)
                 return
