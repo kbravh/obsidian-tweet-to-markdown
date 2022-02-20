@@ -115,6 +115,9 @@ const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
 
   if (!tweetRequest.ok || tweetRequest.status !== 200) {
     const message = await tweetRequest.text()
+    if (message.includes('Sorry, you are not authorized to see the Tweet')) {
+      throw new Error('This tweet is unavailable to be viewed')
+    }
     throw new Error(message)
   }
 
@@ -611,4 +614,9 @@ export const getBearerToken = (plugin: TTM): string => {
       ''
     )
   }
+}
+
+export const tweetStateCleanup = (plugin: TTM): void => {
+  plugin.currentTweet = null
+  plugin.currentTweetMarkdown = ''
 }

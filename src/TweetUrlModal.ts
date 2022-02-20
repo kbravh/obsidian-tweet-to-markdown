@@ -1,5 +1,11 @@
 import {App, Modal, Notice, Setting} from 'obsidian'
-import {buildMarkdown, getBearerToken, getTweet, getTweetID} from './util'
+import {
+  buildMarkdown,
+  getBearerToken,
+  getTweet,
+  getTweetID,
+  tweetStateCleanup,
+} from './util'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TweetCompleteModal} from './TweetCompleteModal'
@@ -107,6 +113,10 @@ export class TweetUrlModal extends Modal {
                 new Notice(
                   'There was a problem processing the downloaded tweet'
                 )
+                // set the button as loading
+                button.setButtonText('Download Tweet')
+                button.setDisabled(false)
+                return
               }
               this.plugin.currentTweetMarkdown =
                 markdown + this.plugin.currentTweetMarkdown
@@ -115,10 +125,29 @@ export class TweetUrlModal extends Modal {
                 this.plugin.currentTweet.data.referenced_tweets.filter(
                   ref_tweet => ref_tweet.type === 'replied_to'
                 )
-              this.plugin.currentTweet = await getTweet(
-                parent_tweet.id,
-                bearerToken
-              )
+              try {
+                this.plugin.currentTweet = await getTweet(
+                  parent_tweet.id,
+                  bearerToken
+                )
+              } catch (error) {
+                if (
+                  error.message.includes(
+                    'This tweet is unavailable to be viewed'
+                  )
+                ) {
+                  new Notice(
+                    'One of the tweets in this thread is unavailable to be viewed. Download failed.'
+                  )
+                } else {
+                  new Notice(error.message)
+                }
+                tweetStateCleanup(this.plugin)
+                // set the button as loading
+                button.setButtonText('Download Tweet')
+                button.setDisabled(false)
+                return
+              }
             }
           }
 
