@@ -86,6 +86,6 @@ export class TweetCompleteModal extends Modal {
 
     // clean up
     this.plugin.currentTweet = null
-    this.plugin.currentTweetMarkdown = null
+    this.plugin.currentTweetMarkdown = ''
   }
 }
