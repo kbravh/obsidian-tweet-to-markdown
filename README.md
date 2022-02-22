@@ -30,12 +30,19 @@ Or, if you'd like to install it manually, clone this repository to the `.obsidia
 
 <!-- USAGE EXAMPLES -->
 
-## Usage
+## Setup
 
-**Heads up! 📢:** As of right now, you need to set up a Twitter bearer token to use this plugin. However, I'm working on another option so that you won't have to go through that hassle. Keep your eyes peeled for version 2.0.0 😎
+To use this tool, you have two options:
+- Sign up for a free API key from https://ttm.kbravh.dev (new in v2.0.0)
+- Sign up for a bearer token through the Twitter Developer dashboard
 
-### Bearer token
-To use this tool, you'll need to set up an application and get a bearer token on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
+Getting a free API key from https://ttm.kbravh.dev is the easiest method of using this plugin, as you won't have to go through Twitter's developer application process. Their application is tedious, and they don't always approve requests. However, you are more than welcome to follow the guide below to retrieve your own bearer token from Twitter. This will give you the most control, freedom, and security over your usage.
+
+### Free TTM API key
+You can sign up for a free API key at https://ttm.kbravh.dev by signing in with either your GitHub or Twitter account and heading to your account page. Once you sign in and retrieve your API key from your account page, copy and paste it into the API key/bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TTM_API_KEY`.
+
+### Twitter Developer bearer token
+To get a bearer token from Twitter, you'll need to set up an application on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
 Nota bene: On Unix machines, make sure to set this in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
 

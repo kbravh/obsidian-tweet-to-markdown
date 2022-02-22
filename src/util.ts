@@ -34,13 +34,23 @@ export const getTweetID = (src: string): string => {
   return id
 }
 
+export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
+  if (bearer.startsWith('TTM>')) {
+    return getTweetFromTTM(id, bearer)
+  }
+  return getTweetFromTwitter(id, bearer)
+}
+
 /**
  * Fetches a tweet object from the Twitter v2 API
  * @param {string} id - The ID of the tweet to fetch from the API
  * @param {string} bearer - The bearer token
  * @returns {Tweet} - The tweet from the Twitter API
  */
-export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
+const getTweetFromTwitter = async (
+  id: string,
+  bearer: string
+): Promise<Tweet> => {
   const twitterUrl = new URL(`https://api.twitter.com/2/tweets/${id}`)
   const params = new URLSearchParams({
     expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
@@ -70,6 +80,9 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
   if (tweet.errors) {
     throw new Error(tweet.errors[0].detail)
   }
+  if (tweet?.status === 401) {
+    throw new Error('There seems to be a problem with your bearer token.')
+  }
   if (tweet?.reason) {
     switch (tweet.reason) {
       case 'client-not-enrolled':
@@ -77,6 +90,40 @@ export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
         throw new Error('There seems to be a problem with your bearer token.')
     }
   }
+  return tweet
+}
+
+/**
+ * Fetches a tweet object from the TTM service API
+ * @param {string} id - The ID of the tweet to fetch from the API
+ * @param {string} bearer - The bearer token
+ * @returns {Promise<Tweet>} - The tweet from the Twitter API
+ */
+const getTweetFromTTM = async (id: string, bearer: string): Promise<Tweet> => {
+  const ttmUrl = new URL('https://ttm.kbravh.dev/api/tweet')
+  const params = new URLSearchParams({
+    tweet: id,
+  })
+  let tweetRequest
+  try {
+    tweetRequest = await fetch(`${ttmUrl.href}?${params.toString()}`, {
+      method: 'GET',
+      headers: {Authorization: `Bearer ${bearer}`},
+    })
+  } catch (error) {
+    throw new Error(error)
+  }
+
+  if (!tweetRequest.ok || tweetRequest.status !== 200) {
+    const message = await tweetRequest.text()
+    if (message.includes('Sorry, you are not authorized to see the Tweet')) {
+      throw new Error('This tweet is unavailable to be viewed')
+    }
+    throw new Error(message)
+  }
+
+  const tweet: Tweet = await tweetRequest.json()
+
   return tweet
 }
 
@@ -300,14 +347,19 @@ export const buildMarkdown = async (
     for (const subtweet_ref of tweet.data?.referenced_tweets) {
       if (subtweet_ref?.type === 'quoted') {
         const subtweet = await getTweet(subtweet_ref.id, plugin.bearerToken)
-        const subtweet_text = await buildMarkdown(
-          app,
-          plugin,
-          downloadManager,
-          subtweet,
-          'quoted'
-        )
-        markdown.push('', '', subtweet_text)
+        let subtweet_text
+        try {
+          subtweet_text = await buildMarkdown(
+            app,
+            plugin,
+            downloadManager,
+            subtweet,
+            'quoted'
+          )
+        } catch (error) {
+          new Notice('There was a problem processing the downloaded tweet')
+        }
+        markdown.push('\n\n' + subtweet_text)
       }
     }
   }
@@ -423,13 +475,7 @@ export const pasteTweet = async (
   }
 
   // if it is a Tweet link, check for bearer token
-  let bearerToken
-  if (Platform.isMobileApp) {
-    bearerToken = plugin.settings.bearerToken || ''
-  } else {
-    bearerToken =
-      plugin.settings.bearerToken || process.env.TWITTER_BEARER_TOKEN || ''
-  }
+  const bearerToken = getBearerToken(plugin)
   if (!bearerToken) {
     new Notice('Twitter bearer token was not found.')
     return
@@ -453,13 +499,20 @@ export const pasteTweet = async (
     editor.setValue(text)
   }
 
-  const markdown = await buildMarkdown(
-    plugin.app,
-    plugin,
-    downloadManager,
-    plugin.currentTweet,
-    'embed'
-  )
+  let markdown
+  try {
+    markdown = await buildMarkdown(
+      plugin.app,
+      plugin,
+      downloadManager,
+      plugin.currentTweet,
+      'embed'
+    )
+  } catch (error) {
+    new Notice('There was a problem processing the downloaded tweet')
+    plugin.currentTweet = null
+    return
+  }
 
   plugin.currentTweetMarkdown = markdown + plugin.currentTweetMarkdown
 
@@ -550,4 +603,22 @@ export const doesFileExist = (app: App, filepath: string): boolean => {
     return false
   }
   return !!file
+}
+
+export const getBearerToken = (plugin: TTM): string => {
+  if (Platform.isMobileApp) {
+    return plugin.settings.bearerToken || ''
+  } else {
+    return (
+      plugin.settings.bearerToken ||
+      process.env.TTM_API_KEY ||
+      process.env.TWITTER_BEARER_TOKEN ||
+      ''
+    )
+  }
+}
+
+export const tweetStateCleanup = (plugin: TTM): void => {
+  plugin.currentTweet = null
+  plugin.currentTweetMarkdown = ''
 }

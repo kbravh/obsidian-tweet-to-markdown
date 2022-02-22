@@ -1,5 +1,11 @@
-import {App, Modal, Notice, Platform, Setting} from 'obsidian'
-import {buildMarkdown, getTweet, getTweetID} from './util'
+import {App, Modal, Notice, Setting} from 'obsidian'
+import {
+  buildMarkdown,
+  getBearerToken,
+  getTweet,
+  getTweetID,
+  tweetStateCleanup,
+} from './util'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TweetCompleteModal} from './TweetCompleteModal'
@@ -49,15 +55,7 @@ export class TweetUrlModal extends Modal {
             return
           }
           // error checking for kickoff
-          let bearerToken
-          if (Platform.isMobileApp) {
-            bearerToken = this.plugin.settings.bearerToken || ''
-          } else {
-            bearerToken =
-              this.plugin.settings.bearerToken ||
-              process.env.TWITTER_BEARER_TOKEN ||
-              ''
-          }
+          const bearerToken = getBearerToken(this.plugin)
           if (!bearerToken) {
             new Notice('Bearer token was not found.')
             return
@@ -79,6 +77,9 @@ export class TweetUrlModal extends Modal {
 
           this.downloadManager = createDownloadManager()
 
+          // reset thread count
+          this.plugin.threadCount = 0
+
           // set the button as loading
           button.setButtonText('Loading...')
           button.setDisabled(true)
@@ -88,12 +89,13 @@ export class TweetUrlModal extends Modal {
             this.plugin.currentTweet = await getTweet(id, bearerToken)
           } catch (error) {
             new Notice(error.message)
-            // set the button as loading
+            // set the button as not loading
             button.setButtonText('Download Tweet')
             button.setDisabled(false)
             return
           }
           this.plugin.currentTweetMarkdown = ''
+          button.setButtonText(`${++this.plugin.threadCount} tweet fetched...`)
 
           // special handling for threads
           if (this.thread) {
@@ -102,13 +104,24 @@ export class TweetUrlModal extends Modal {
               this.plugin.currentTweet.data.conversation_id !==
               this.plugin.currentTweet.data.id
             ) {
-              const markdown = await buildMarkdown(
-                this.app,
-                this.plugin,
-                this.downloadManager,
-                this.plugin.currentTweet,
-                'thread'
-              )
+              let markdown
+              try {
+                markdown = await buildMarkdown(
+                  this.app,
+                  this.plugin,
+                  this.downloadManager,
+                  this.plugin.currentTweet,
+                  'thread'
+                )
+              } catch (error) {
+                new Notice(
+                  'There was a problem processing the downloaded tweet'
+                )
+                // set the button as not loading
+                button.setButtonText('Download Tweet')
+                button.setDisabled(false)
+                return
+              }
               this.plugin.currentTweetMarkdown =
                 markdown + this.plugin.currentTweetMarkdown
               // load in parent tweet
@@ -116,19 +129,46 @@ export class TweetUrlModal extends Modal {
                 this.plugin.currentTweet.data.referenced_tweets.filter(
                   ref_tweet => ref_tweet.type === 'replied_to'
                 )
-              this.plugin.currentTweet = await getTweet(
-                parent_tweet.id,
-                bearerToken
-              )
+              try {
+                this.plugin.currentTweet = await getTweet(
+                  parent_tweet.id,
+                  bearerToken
+                )
+                button.setButtonText(
+                  `${++this.plugin.threadCount} tweets fetched...`
+                )
+              } catch (error) {
+                if (
+                  error.message.includes(
+                    'This tweet is unavailable to be viewed'
+                  )
+                ) {
+                  new Notice(
+                    'One of the tweets in this thread is unavailable to be viewed. Download failed.'
+                  )
+                } else {
+                  new Notice(error.message)
+                }
+                tweetStateCleanup(this.plugin)
+                // set the button as not loading
+                button.setButtonText('Download Tweet')
+                button.setDisabled(false)
+                return
+              }
             }
           }
 
-          const markdown = await buildMarkdown(
-            this.app,
-            this.plugin,
-            this.downloadManager,
-            this.plugin.currentTweet
-          )
+          let markdown
+          try {
+            markdown = await buildMarkdown(
+              this.app,
+              this.plugin,
+              this.downloadManager,
+              this.plugin.currentTweet
+            )
+          } catch (error) {
+            new Notice('There was a problem processing the downloaded tweet')
+          }
           this.plugin.currentTweetMarkdown =
             markdown + this.plugin.currentTweetMarkdown
 

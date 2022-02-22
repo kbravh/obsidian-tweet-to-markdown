@@ -44,11 +44,11 @@ export class TTMSettingTab extends PluginSettingTab {
     containerEl.createEl('h2', {text: 'Settings for Tweet to Markdown'})
 
     new Setting(containerEl)
-      .setName('Bearer Token')
+      .setName('API key or bearer token')
       .setDesc(
         Platform.isMobileApp
-          ? 'Enter your V2 Twitter bearer token.'
-          : 'Enter your V2 Twitter bearer token, or store it in the environment variable TWITTER_BEARER_TOKEN.'
+          ? 'Enter your API key or Twitter bearer token.'
+          : 'Enter your API key or Twitter bearer token, or store it in the environment variable TTM_API_KEY or TWITTER_BEARER_TOKEN.'
       )
       .addText(text =>
         text
@@ -67,7 +67,7 @@ export class TTMSettingTab extends PluginSettingTab {
       )
       .addText(text =>
         text
-          .setPlaceholder('tweets/')
+          .setPlaceholder('.')
           .setValue(this.plugin.settings.noteLocation)
           .onChange(async value => {
             this.plugin.settings.noteLocation = value
