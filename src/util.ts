@@ -257,38 +257,31 @@ export const buildMarkdown = async (
   /**
    * replace entities with markdown links
    */
-  if (tweet.data?.entities) {
+  if (tweet.data?.entities && !plugin.settings.slimmedDown) {
     /**
      * replace any mentions, hashtags, cashtags, urls with links
      */
-    tweet.data.entities?.mentions &&
-      tweet.data.entities?.mentions.forEach(({username}) => {
-        text = text.replace(
-          `@${username}`,
-          `[@${username}](https://twitter.com/${username})`
-        )
-      })
-    tweet.data.entities?.hashtags &&
-      tweet.data.entities?.hashtags.forEach(({tag}) => {
-        text = text.replace(
-          `#${tag}`,
-          `[#${tag}](https://twitter.com/hashtag/${tag}) `
-        )
-      })
-    tweet.data.entities?.cashtags &&
-      tweet.data.entities?.cashtags.forEach(({tag}) => {
-        text = text.replace(
-          `$${tag}`,
-          `[$${tag}](https://twitter.com/search?q=%24${tag})`
-        )
-      })
-    tweet.data.entities?.urls &&
-      tweet.data.entities?.urls.forEach(url => {
-        text = text.replace(
-          url.url,
-          `[${url.display_url}](${url.expanded_url})`
-        )
-      })
+    tweet.data.entities?.mentions?.forEach(({username}) => {
+      text = text.replace(
+        `@${username}`,
+        `[@${username}](https://twitter.com/${username})`
+      )
+    })
+    tweet.data.entities?.hashtags?.forEach(({tag}) => {
+      text = text.replace(
+        `#${tag}`,
+        `[#${tag}](https://twitter.com/hashtag/${tag}) `
+      )
+    })
+    tweet.data.entities?.cashtags?.forEach(({tag}) => {
+      text = text.replace(
+        `$${tag}`,
+        `[$${tag}](https://twitter.com/search?q=%24${tag})`
+      )
+    })
+    tweet.data.entities?.urls?.forEach(url => {
+      text = text.replace(url.url, `[${url.display_url}](${url.expanded_url})`)
+    })
   }
 
   const date = moment(tweet.data.created_at)
@@ -309,7 +302,7 @@ export const buildMarkdown = async (
 
   const assetPath = plugin.settings.assetLocation || 'assets'
   let markdown = []
-  if (plugin.settings.avatars) {
+  if (plugin.settings.avatars && !plugin.settings.slimmedDown) {
     markdown.push(
       `![${user.username}](${
         plugin.settings.downloadAssets
@@ -318,11 +311,19 @@ export const buildMarkdown = async (
       })` // profile image
     )
   }
-  markdown.push(
-    `${user.name} ([@${user.username}](https://twitter.com/${user.username})) - ${date}`, // name, handle, and date
-    '\n',
-    `${text}`
-  ) // text of the tweet
+  if (plugin.settings.slimmedDown) {
+    markdown.push(
+      `${user.name} (${user.username}) - ${date}`, // name, handle, and date
+      '\n',
+      `${text}`
+    )
+  } else {
+    markdown.push(
+      `${user.name} ([@${user.username}](https://twitter.com/${user.username})) - ${date}`, // name, handle, and date
+      '\n',
+      `${text}`
+    ) // text of the tweet
+  }
 
   // remove newlines from within tweet text to avoid breaking our formatting
   markdown = markdown.flatMap(line => line.split('\n'))
@@ -332,14 +333,14 @@ export const buildMarkdown = async (
     markdown = markdown.concat(createPollTable(tweet.includes.polls))
   }
 
-  if (tweet.includes?.media) {
+  if (tweet.includes?.media && !plugin.settings.slimmedDown) {
     markdown = markdown.concat(
       createMediaElements(plugin.settings, tweet.includes?.media)
     )
   }
 
   // download images
-  if (plugin.settings.downloadAssets) {
+  if (plugin.settings.downloadAssets && !plugin.settings.slimmedDown) {
     downloadImages(app, downloadManager, tweet, plugin)
   }
 
@@ -366,11 +367,13 @@ export const buildMarkdown = async (
   }
 
   // add original tweet link to end of tweet
-  markdown.push(
-    '',
-    '',
-    `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
-  )
+  if (!plugin.settings.slimmedDown) {
+    markdown.push(
+      '',
+      '',
+      `[Tweet link](https://twitter.com/${user.username}/status/${tweet.data.id})`
+    )
+  }
 
   // indent all lines for a quoted tweet
   if (type === 'quoted') {

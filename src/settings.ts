@@ -10,6 +10,7 @@ export interface TTMSettings {
   tweetLinkFetch: boolean
   embedMethod: 'text' | 'obsidian'
   avatars: boolean
+  slimmedDown: boolean
   dateFormat: string
   dateLocale: string
 }
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   tweetLinkFetch: false,
   embedMethod: 'obsidian',
   avatars: true,
+  slimmedDown: false,
   dateFormat: 'LLL',
   dateLocale: 'en',
 }
@@ -157,6 +159,20 @@ export class TTMSettingTab extends PluginSettingTab {
           this.plugin.settings.avatars = value
           await this.plugin.saveSettings()
         })
+      )
+
+    new Setting(containerEl)
+      .setName('Slimmed down tweets')
+      .setDesc(
+        'Only include the author information and the tweet text, no links or images.'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.slimmedDown)
+          .onChange(async value => {
+            this.plugin.settings.slimmedDown = value
+            await this.plugin.saveSettings()
+          })
       )
 
     new Setting(containerEl)
