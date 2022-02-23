@@ -11,6 +11,7 @@ import {
 } from 'obsidian'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import {Media, Poll, Tweet} from './models'
+import {decode} from 'html-entities'
 import {moment} from 'obsidian'
 import TTM from 'main'
 import {TTMSettings} from './settings'
@@ -250,7 +251,7 @@ export const buildMarkdown = async (
     `replies: ${tweet.data.public_metrics.reply_count}`,
   ]
 
-  let text = tweet.data.text
+  let text = decode(tweet.data.text)
   const user = tweet.includes.users[0]
 
   /**
