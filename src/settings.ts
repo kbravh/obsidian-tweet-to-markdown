@@ -9,8 +9,10 @@ export interface TTMSettings {
   filename: string | null
   tweetLinkFetch: boolean
   embedMethod: 'text' | 'obsidian'
+  frontmatter: boolean
   avatars: boolean
-  slimmedDown: boolean
+  textOnly: boolean
+  includeDate: boolean
   dateFormat: string
   dateLocale: string
 }
@@ -23,8 +25,10 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   filename: null,
   tweetLinkFetch: false,
   embedMethod: 'obsidian',
+  frontmatter: true,
   avatars: true,
-  slimmedDown: false,
+  textOnly: false,
+  includeDate: true,
   dateFormat: 'LLL',
   dateLocale: 'en',
 }
@@ -150,9 +154,23 @@ export class TTMSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
+      .setName('Include frontmatter')
+      .setDesc(
+        'Include tweet metadata such as  author, original link, and metrics (likes, retweets, &c.) as a frontmatter block.'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.frontmatter)
+          .onChange(async value => {
+            this.plugin.settings.frontmatter = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
       .setName('Include profile pictures')
       .setDesc(
-        'Whether to include the profile image of the tweet author in the saved tweet.'
+        'Include the profile image of the tweet author in the saved tweet.'
       )
       .addToggle(toggle =>
         toggle.setValue(this.plugin.settings.avatars).onChange(async value => {
@@ -162,15 +180,25 @@ export class TTMSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
-      .setName('Slimmed down tweets')
+      .setName('Text only')
       .setDesc(
-        'Only include the author information and the tweet text, no links or images.'
+        'Only include the author information and the tweet text, no images or extra links.'
       )
       .addToggle(toggle =>
+        toggle.setValue(this.plugin.settings.textOnly).onChange(async value => {
+          this.plugin.settings.textOnly = value
+          await this.plugin.saveSettings()
+        })
+      )
+
+    new Setting(containerEl)
+      .setName('Include date')
+      .setDesc("Include the tweet date next to the author's name.")
+      .addToggle(toggle =>
         toggle
-          .setValue(this.plugin.settings.slimmedDown)
+          .setValue(this.plugin.settings.includeDate)
           .onChange(async value => {
-            this.plugin.settings.slimmedDown = value
+            this.plugin.settings.includeDate = value
             await this.plugin.saveSettings()
           })
       )
