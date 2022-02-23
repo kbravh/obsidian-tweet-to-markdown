@@ -257,7 +257,7 @@ export const buildMarkdown = async (
   /**
    * replace entities with markdown links
    */
-  if (tweet.data?.entities && !plugin.settings.slimmedDown) {
+  if (tweet.data?.entities && !plugin.settings.textOnly) {
     /**
      * replace any mentions, hashtags, cashtags, urls with links
      */
@@ -287,22 +287,27 @@ export const buildMarkdown = async (
   const date = moment(tweet.data.created_at)
     .locale(plugin.settings.dateLocale)
     .format(plugin.settings.dateFormat)
+
+  const displayDate = (plugin: TTM, date: string): string =>
+    plugin.settings.includeDate ? ` - ${date}` : ''
   /**
    * Define the frontmatter as the name, handle, and source url
    */
-  const frontmatter = [
-    '---',
-    `author: "${user.name}"`,
-    `handle: "@${user.username}"`,
-    `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
-    `date: "${date}"`,
-    ...metrics,
-    '---',
-  ]
+  const frontmatter = plugin.settings.frontmatter
+    ? [
+        '---',
+        `author: "${user.name}"`,
+        `handle: "@${user.username}"`,
+        `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
+        `date: "${date}"`,
+        ...metrics,
+        '---',
+      ]
+    : []
 
   const assetPath = plugin.settings.assetLocation || 'assets'
   let markdown = []
-  if (plugin.settings.avatars && !plugin.settings.slimmedDown) {
+  if (plugin.settings.avatars) {
     markdown.push(
       `![${user.username}](${
         plugin.settings.downloadAssets
@@ -311,15 +316,17 @@ export const buildMarkdown = async (
       })` // profile image
     )
   }
-  if (plugin.settings.slimmedDown) {
+  if (plugin.settings.textOnly) {
     markdown.push(
-      `${user.name} (${user.username}) - ${date}`, // name, handle, and date
+      `${user.name} (${user.username})${displayDate(plugin, date)}`, // name, handle, and date
       '\n',
       `${text}`
     )
   } else {
     markdown.push(
-      `${user.name} ([@${user.username}](https://twitter.com/${user.username})) - ${date}`, // name, handle, and date
+      `${user.name} ([@${user.username}](https://twitter.com/${
+        user.username
+      }))${displayDate(plugin, date)}`, // name, handle, and date
       '\n',
       `${text}`
     ) // text of the tweet
@@ -333,14 +340,14 @@ export const buildMarkdown = async (
     markdown = markdown.concat(createPollTable(tweet.includes.polls))
   }
 
-  if (tweet.includes?.media && !plugin.settings.slimmedDown) {
+  if (tweet.includes?.media && !plugin.settings.textOnly) {
     markdown = markdown.concat(
       createMediaElements(plugin.settings, tweet.includes?.media)
     )
   }
 
   // download images
-  if (plugin.settings.downloadAssets && !plugin.settings.slimmedDown) {
+  if (plugin.settings.downloadAssets && !plugin.settings.textOnly) {
     downloadImages(app, downloadManager, tweet, plugin)
   }
 
@@ -367,7 +374,7 @@ export const buildMarkdown = async (
   }
 
   // add original tweet link to end of tweet
-  if (!plugin.settings.slimmedDown) {
+  if (!plugin.settings.textOnly) {
     markdown.push(
       '',
       '',

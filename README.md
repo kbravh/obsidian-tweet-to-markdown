@@ -101,8 +101,26 @@ Nota bene: Unfortunately, there is currently not a way to retrieve gifs or video
 ## Note customization
 There are some options to customize the output of the note.
 
+### Frontmatter
+By default, a frontmatter block will be included when the tweet is downloaded. The frontmatter will display:
+- author
+- handle
+- source (the original tweet link)
+- date
+- likes
+- retweets
+- replies
+
+You can toggle this frontmatter block off to not include it when downloading tweets.
+
 ### Author profile pictures
 By default, the tweet author's profile picture will be included with the downloaded tweet. To exclude it, disable the **Include profile pictures** in the plugin settings.
+
+### Text only
+If you'd like a slimmed down tweet, you can enable this option. It will remove all image embeds from the incoming tweets and not add in any links for mentions, hashtags, etc. Any links that were originally in the tweet will still be present.
+
+### Include date
+By default, the date of the tweet will be included based on the format and locale defined below. To remove the date entirely, toggle this feature.
 
 ### Date format
 To customize the format that the date is saved when downloading a tweet, you can provide a format string in the plugin settings. These format strings can be found in the [Moment.js docs](https://momentjs.com/docs/#/displaying/format/). You can also set your locale, which defaults to `en`. By default the format is `LLL`, which produces a date like `September 4, 1986 8:30 PM` with the `en` locale.
