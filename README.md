@@ -94,7 +94,7 @@ To save the tweet to a place other than the root of your vault, type a new path 
 
 Want to really capture the entire tweet locally? You can flip the **Download images** switch to download all the tweet images as well, instead of just linking to the images on the web. If the tweet is ever deleted or Twitter is unavailable, you'll still have your note.
 
-Tweet images will be automatically saved to the directory `tweet-assets/`. If you'd like to save the assets to a custom directory, type that directory in the **Image location** field.
+Tweet images will be automatically saved to the directory `assets/`. If you'd like to save the assets to a custom directory, type that directory in the **Image location** field.
 
 Nota bene: Unfortunately, there is currently not a way to retrieve gifs or videos from tweets using the v2 API.
 

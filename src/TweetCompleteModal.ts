@@ -1,5 +1,5 @@
 import {App, Modal, Notice, Setting} from 'obsidian'
-import {createFilename, doesFileExist} from './util'
+import {createFilename, doesFileExist, sanitizeFilename} from './util'
 import TTM from 'main'
 
 export class TweetCompleteModal extends Modal {
@@ -13,9 +13,9 @@ export class TweetCompleteModal extends Modal {
     const {contentEl, titleEl} = this
     titleEl.setText('Name tweet file')
 
-    let filename = createFilename(
-      this.plugin.currentTweet,
-      this.plugin.settings.filename
+    let filename = sanitizeFilename(
+      createFilename(this.plugin.currentTweet, this.plugin.settings.filename),
+      'decode'
     )
 
     new Setting(contentEl)
@@ -27,7 +27,10 @@ export class TweetCompleteModal extends Modal {
         input.setValue(filename)
         input
           .onChange(value => {
-            filename = createFilename(this.plugin.currentTweet, value)
+            filename = sanitizeFilename(
+              createFilename(this.plugin.currentTweet, value),
+              'decode'
+            )
           })
           .setPlaceholder('[[handle]] - [[id]]')
       })
@@ -36,30 +39,27 @@ export class TweetCompleteModal extends Modal {
       button.setButtonText('Save Tweet')
       button.onClick(async () => {
         // see if file already exists
-        const file = doesFileExist(
-          this.app,
-          `${this.plugin.settings.noteLocation}/${filename}`
+        const location = sanitizeFilename(
+          this.plugin.settings.noteLocation,
+          'decode'
         )
+        const file = doesFileExist(this.app, `${location}/${filename}`)
         if (file) {
           new Notice(`The file ${filename} already exists`)
           return
         }
 
-        if (this.plugin.settings.noteLocation) {
+        if (location) {
           // create the directory
-          const doesFolderExist = await this.app.vault.adapter.exists(
-            this.plugin.settings.noteLocation
-          )
+          const doesFolderExist = await this.app.vault.adapter.exists(location)
           if (!doesFolderExist) {
-            await this.app.vault
-              .createFolder(this.plugin.settings.noteLocation)
-              .catch(error => {
-                new Notice('Error creating tweet directory.')
-                console.error(
-                  'There was an error creating the tweet directory.',
-                  error
-                )
-              })
+            await this.app.vault.createFolder(location).catch(error => {
+              new Notice('Error creating tweet directory.')
+              console.error(
+                'There was an error creating the tweet directory.',
+                error
+              )
+            })
           }
         }
 
@@ -69,7 +69,7 @@ export class TweetCompleteModal extends Modal {
 
         // write the note to file
         await this.app.vault.create(
-          `${this.plugin.settings.noteLocation}/${filename}`,
+          `${location}/${filename}`,
           this.plugin.currentTweetMarkdown
         )
 

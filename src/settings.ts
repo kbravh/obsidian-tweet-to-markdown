@@ -5,6 +5,7 @@ export interface TTMSettings {
   bearerToken: string | null
   noteLocation: string | null
   downloadAssets: boolean
+  imageEmbedStyle: 'markdown' | 'obsidian'
   assetLocation: string | null
   filename: string | null
   tweetLinkFetch: boolean
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   bearerToken: null,
   noteLocation: '',
   downloadAssets: false,
+  imageEmbedStyle: 'markdown',
   assetLocation: '',
   filename: null,
   tweetLinkFetch: false,
@@ -89,6 +91,24 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.downloadAssets)
           .onChange(async value => {
             this.plugin.settings.downloadAssets = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Image embed style')
+      .setDesc(
+        'Embed images in markdown style or Obsidian style. Obsidian style will only work if you download images.'
+      )
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions({
+            markdown: 'Markdown embed',
+            obsidian: 'Obsidian embed',
+          })
+          .setValue(this.plugin.settings.imageEmbedStyle)
+          .onChange(async (value: 'markdown' | 'obsidian') => {
+            this.plugin.settings.imageEmbedStyle = value
             await this.plugin.saveSettings()
           })
       )
