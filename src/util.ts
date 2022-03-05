@@ -161,13 +161,21 @@ const windowsTrailingRe = /[. ]+$/
  * @param filename string
  * @returns string
  */
-export const sanitizeFilename = (filename: string): string => {
+export const sanitizeFilename = (
+  filename: string,
+  alter: 'encode' | 'decode' | 'none' = 'none'
+): string => {
   filename = filename
     .replace(illegalRe, '')
     .replace(controlRe, '')
     .replace(reservedRe, '')
     .replace(windowsReservedRe, '')
     .replace(windowsTrailingRe, '')
+  if (alter === 'decode') {
+    filename = decodeURI(filename)
+  } else if (alter === 'encode') {
+    filename = encodeURI(filename)
+  }
   return truncateBytewise(filename, 252)
 }
 
@@ -213,13 +221,22 @@ export const createMediaElements = (
   return media
     .map((medium: Media) => {
       if (settings.downloadAssets) {
-        const assetLocation = settings.assetLocation || 'assets'
+        const assetLocation = decodeURI(settings.assetLocation || 'assets')
+        const alter =
+          settings.imageEmbedStyle === 'markdown' ? 'encode' : 'decode'
         const filepath = normalizePath(
-          `${assetLocation}/${medium.media_key}.jpg`
+          `${sanitizeFilename(assetLocation, alter)}/${sanitizeFilename(
+            medium.media_key,
+            alter
+          )}.jpg`
         )
         switch (medium.type) {
           case 'photo':
-            return `\n![${medium.alt_text ?? medium.media_key}](${filepath})`
+            if (settings.imageEmbedStyle === 'markdown') {
+              return `\n![${medium.alt_text ?? medium.media_key}](${filepath})`
+            } else {
+              return `\n![[${filepath}]]`
+            }
           default:
             break
         }
@@ -306,16 +323,28 @@ export const buildMarkdown = async (
       ]
     : []
 
-  const assetPath = plugin.settings.assetLocation || 'assets'
+  const assetPath = decodeURI(plugin.settings.assetLocation || 'assets')
   let markdown = []
   if (plugin.settings.avatars) {
-    markdown.push(
-      `![${user.username}](${
-        plugin.settings.downloadAssets
-          ? normalizePath(`${assetPath}/${user.username}-${user.id}.jpg`)
-          : user.profile_image_url
-      })` // profile image
-    )
+    const obsidianImageEmbeds =
+      plugin.settings.imageEmbedStyle === 'obsidian' &&
+      plugin.settings.downloadAssets
+    const alter = obsidianImageEmbeds ? 'decode' : 'encode'
+    const filename = `${normalizePath(
+      `${sanitizeFilename(assetPath, alter)}/${sanitizeFilename(
+        user.username,
+        alter
+      )}-${user.id}.jpg`
+    )}`
+    if (obsidianImageEmbeds) {
+      markdown.push(`![[${filename}]]`)
+    } else {
+      markdown.push(
+        `![${user.username}](${
+          plugin.settings.downloadAssets ? filename : user.profile_image_url
+        })` // profile image
+      )
+    }
   }
   if (plugin.settings.textOnly) {
     markdown.push(
@@ -413,7 +442,10 @@ export const downloadImages = (
   tweet: Tweet,
   plugin: TTM
 ): void => {
-  const assetLocation = plugin.settings.assetLocation || 'assets'
+  const assetLocation = sanitizeFilename(
+    plugin.settings.assetLocation || 'assets',
+    'decode'
+  )
   const user = tweet.includes.users[0]
 
   // create the image folder
@@ -553,33 +585,29 @@ export const pasteTweet = async (
     text = text.replace(placeholder, plugin.currentTweetMarkdown)
   } else {
     let filename = createFilename(plugin.currentTweet, plugin.settings.filename)
-    const fileExists = doesFileExist(
-      plugin.app,
-      `${plugin.settings.noteLocation}/${filename}`
-    )
+    filename = sanitizeFilename(filename, 'decode')
+    const location = sanitizeFilename(plugin.settings.noteLocation, 'decode')
+    const fileExists = doesFileExist(plugin.app, `${location}/${filename}`)
     if (fileExists) {
       // just unique-ify the title for now
       filename = `${uuid().substring(0, 8)}-${filename}`
     }
-    if (plugin.settings.noteLocation) {
+    if (location) {
       // create the directory
-      const doesFolderExist = await plugin.app.vault.adapter.exists(
-        plugin.settings.noteLocation
-      )
+      const doesFolderExist = await plugin.app.vault.adapter.exists(location)
       if (!doesFolderExist) {
-        await plugin.app.vault
-          .createFolder(plugin.settings.noteLocation)
-          .catch(error => {
-            new Notice('Error creating tweet directory.')
-            console.error(
-              'There was an error creating the tweet directory.',
-              error
-            )
-          })
+        await plugin.app.vault.createFolder(location).catch(error => {
+          new Notice('Error creating tweet directory.')
+          console.error(
+            'There was an error creating the tweet directory.',
+            error
+          )
+        })
       }
     }
+    const sanitizedFilename = `${location}/${filename}`
     await plugin.app.vault.create(
-      `${plugin.settings.noteLocation}/${filename}`,
+      sanitizedFilename,
       plugin.currentTweetMarkdown
     )
     text = text.replace(placeholder, `![[${filename}]]`)
