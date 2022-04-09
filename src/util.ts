@@ -377,7 +377,7 @@ export const buildMarkdown = async (
   }
 
   // download images
-  if (plugin.settings.downloadAssets && plugin.settings.includeImages) {
+  if (plugin.settings.downloadAssets) {
     downloadImages(app, downloadManager, tweet, plugin)
   }
 
@@ -460,18 +460,20 @@ export const downloadImages = (
     })
   }
 
-  tweet.includes?.media?.forEach((medium: Media) => {
-    switch (medium.type) {
-      case 'photo':
-        filesToDownload.push({
-          url: medium.url,
-          title: `${medium.media_key}.jpg`,
-        })
-        break
-      default:
-        break
-    }
-  })
+  if (plugin.settings.includeImages) {
+    tweet.includes?.media?.forEach((medium: Media) => {
+      switch (medium.type) {
+        case 'photo':
+          filesToDownload.push({
+            url: medium.url,
+            title: `${medium.media_key}.jpg`,
+          })
+          break
+        default:
+          break
+      }
+    })
+  }
 
   //Filter out tweet images that already exist locally
   filesToDownload = filesToDownload.filter(
