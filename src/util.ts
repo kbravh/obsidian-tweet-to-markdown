@@ -275,7 +275,7 @@ export const buildMarkdown = async (
   /**
    * replace entities with markdown links
    */
-  if (tweet.data?.entities && !plugin.settings.textOnly) {
+  if (tweet.data?.entities && plugin.settings.includeLinks) {
     /**
      * replace any mentions, hashtags, cashtags, urls with links
      */
@@ -346,7 +346,7 @@ export const buildMarkdown = async (
       )
     }
   }
-  if (plugin.settings.textOnly) {
+  if (!plugin.settings.includeLinks) {
     markdown.push(
       `${user.name} (${user.username})${displayDate(plugin, date)}`, // name, handle, and date
       '\n',
@@ -370,14 +370,14 @@ export const buildMarkdown = async (
     markdown = markdown.concat(createPollTable(tweet.includes.polls))
   }
 
-  if (tweet.includes?.media && !plugin.settings.textOnly) {
+  if (tweet.includes?.media && plugin.settings.includeImages) {
     markdown = markdown.concat(
       createMediaElements(plugin.settings, tweet.includes?.media)
     )
   }
 
   // download images
-  if (plugin.settings.downloadAssets && !plugin.settings.textOnly) {
+  if (plugin.settings.downloadAssets && plugin.settings.includeImages) {
     downloadImages(app, downloadManager, tweet, plugin)
   }
 
@@ -404,7 +404,7 @@ export const buildMarkdown = async (
   }
 
   // add original tweet link to end of tweet
-  if (!plugin.settings.textOnly) {
+  if (plugin.settings.includeLinks) {
     markdown.push(
       '',
       '',

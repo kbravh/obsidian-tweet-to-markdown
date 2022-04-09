@@ -40,6 +40,13 @@ export default class TTM extends Plugin {
       await this.saveSettings()
     }
 
+    // clean up deprecated textOnly option
+    if (this.settings.textOnly) {
+      this.settings.includeImages = false
+      this.settings.includeLinks = false
+      await this.saveSettings()
+    }
+
     const pasteTweetWrapper = (
       event: ClipboardEvent,
       editor: Editor,

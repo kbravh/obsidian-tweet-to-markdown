@@ -12,7 +12,10 @@ export interface TTMSettings {
   embedMethod: 'text' | 'obsidian'
   frontmatter: boolean
   avatars: boolean
+  /** @deprecated - split into includeImages and includeLinks */
   textOnly: boolean
+  includeImages: boolean
+  includeLinks: boolean
   includeDate: boolean
   dateFormat: string
   dateLocale: string
@@ -30,6 +33,8 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   frontmatter: true,
   avatars: true,
   textOnly: false,
+  includeImages: true,
+  includeLinks: true,
   includeDate: true,
   dateFormat: 'LLL',
   dateLocale: 'en',
@@ -84,6 +89,18 @@ export class TTMSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
+      .setName('Include images')
+      .setDesc('Include images in the generated markdown.')
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.includeImages)
+          .onChange(async value => {
+            this.plugin.settings.includeImages = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
       .setName('Download images')
       .setDesc('Whether to link images or download them to your vault.')
       .addToggle(toggle =>
@@ -91,6 +108,19 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.downloadAssets)
           .onChange(async value => {
             this.plugin.settings.downloadAssets = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Image Location')
+      .setDesc('Where to store the downloaded images. Defaults to `assets/`.')
+      .addText(text =>
+        text
+          .setPlaceholder('assets/')
+          .setValue(this.plugin.settings.assetLocation)
+          .onChange(async value => {
+            this.plugin.settings.assetLocation = value
             await this.plugin.saveSettings()
           })
       )
@@ -114,19 +144,6 @@ export class TTMSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
-      .setName('Image Location')
-      .setDesc('Where to store the downloaded images. Defaults to `assets/`.')
-      .addText(text =>
-        text
-          .setPlaceholder('assets/')
-          .setValue(this.plugin.settings.assetLocation)
-          .onChange(async value => {
-            this.plugin.settings.assetLocation = value
-            await this.plugin.saveSettings()
-          })
-      )
-
-    new Setting(containerEl)
       .setName('Filename')
       .setDesc(
         'The name to give the saved tweet file. You can use the placeholders [[handle]], [[name]], [[text]] and [[id]]. Defaults to "[[handle]] - [[id]]"'
@@ -137,38 +154,6 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.filename)
           .onChange(async value => {
             this.plugin.settings.filename = value
-            await this.plugin.saveSettings()
-          })
-      )
-
-    new Setting(containerEl)
-      .setName('Download Tweet on paste')
-      .setDesc(
-        'Automatically download and embed a tweet when pasting a twitter link.'
-      )
-      .addToggle(toggle =>
-        toggle
-          .setValue(this.plugin.settings.tweetLinkFetch)
-          .onChange(async value => {
-            this.plugin.settings.tweetLinkFetch = value
-            await this.plugin.saveSettings()
-          })
-      )
-
-    new Setting(containerEl)
-      .setName('Pasted Tweet embed method')
-      .setDesc(
-        'Determines if a pasted tweet will be embedded directly into the file or linked with an Obsidian embed.'
-      )
-      .addDropdown(dropdown =>
-        dropdown
-          .addOptions({
-            text: 'Direct text embed',
-            obsidian: 'Obsidian embed',
-          })
-          .setValue(this.plugin.settings.embedMethod)
-          .onChange(async (value: 'text' | 'obsidian') => {
-            this.plugin.settings.embedMethod = value
             await this.plugin.saveSettings()
           })
       )
@@ -200,15 +185,17 @@ export class TTMSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
-      .setName('Text only')
+      .setName('Include links')
       .setDesc(
-        'Only include the author information and the tweet text, no images or extra links.'
+        'Include user profile and original tweet links in the generated markdown.'
       )
       .addToggle(toggle =>
-        toggle.setValue(this.plugin.settings.textOnly).onChange(async value => {
-          this.plugin.settings.textOnly = value
-          await this.plugin.saveSettings()
-        })
+        toggle
+          .setValue(this.plugin.settings.includeLinks)
+          .onChange(async value => {
+            this.plugin.settings.includeLinks = value
+            await this.plugin.saveSettings()
+          })
       )
 
     new Setting(containerEl)
@@ -246,6 +233,38 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.dateLocale)
           .onChange(async value => {
             this.plugin.settings.dateLocale = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Download Tweet on paste')
+      .setDesc(
+        'Automatically download and embed a tweet when pasting a twitter link.'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.tweetLinkFetch)
+          .onChange(async value => {
+            this.plugin.settings.tweetLinkFetch = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Pasted Tweet embed method')
+      .setDesc(
+        'Determines if a pasted tweet will be embedded directly into the file or linked with an Obsidian embed.'
+      )
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions({
+            text: 'Direct text embed',
+            obsidian: 'Obsidian embed',
+          })
+          .setValue(this.plugin.settings.embedMethod)
+          .onChange(async (value: 'text' | 'obsidian') => {
+            this.plugin.settings.embedMethod = value
             await this.plugin.saveSettings()
           })
       )
