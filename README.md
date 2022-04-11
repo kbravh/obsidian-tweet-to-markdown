@@ -116,8 +116,11 @@ You can toggle this frontmatter block off to not include it when downloading twe
 ### Author profile pictures
 By default, the tweet author's profile picture will be included with the downloaded tweet. To exclude it, disable the **Include profile pictures** in the plugin settings.
 
-### Text only
-If you'd like a slimmed down tweet, you can enable this option. It will remove all image embeds from the incoming tweets and not add in any links for mentions, hashtags, etc. Any links that were originally in the tweet will still be present.
+### Include images
+If you'd like a slimmed down tweet, you can disable this option. It will remove all image embeds from the incoming tweets (this does not affect the author profile pictures).
+
+### Include links
+Disabling this option will not hyperlink any mentions, hashtags, etc. Any links that were originally in the tweet will still be present.
 
 ### Include date
 By default, the date of the tweet will be included based on the format and locale defined below. To remove the date entirely, toggle this feature.
