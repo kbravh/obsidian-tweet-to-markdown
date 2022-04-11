@@ -24,7 +24,9 @@
     "obsidian": "^0.12.17",
     "rollup": "^2.32.1",
     "tslib": "^2.2.0",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "vite": "^2.9.1",
+    "vitest": "^0.9.3"
   },
   "dependencies": {
     "core-js": "^3.20.2",
