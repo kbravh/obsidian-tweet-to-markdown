@@ -1,4 +1,4 @@
-import {getTweetID} from '../src/util'
+import {getTweetID, sanitizeFilename} from '../src/util'
 
 describe('Tweet ID', () => {
   it('Extracts tweet Id from regular URL', async () => {
@@ -15,5 +15,16 @@ describe('Tweet ID', () => {
   })
   it('Errors on invalid URL', async () => {
     expect(() => getTweetID('not-a-url')).toThrowError()
+  })
+})
+
+describe('Sanitize filename', () => {
+  it('Allows for nested directories', () => {
+    expect(sanitizeFilename('assets/tweets', 'encode', 'directory')).toBe(
+      'assets/tweets'
+    )
+  })
+  it('Removes slashes from filenames', () => {
+    expect(sanitizeFilename('file/name.md', 'encode')).toBe('filename.md')
   })
 })

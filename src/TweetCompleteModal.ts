@@ -41,7 +41,8 @@ export class TweetCompleteModal extends Modal {
         // see if file already exists
         const location = sanitizeFilename(
           this.plugin.settings.noteLocation,
-          'decode'
+          'decode',
+          'directory'
         )
         const file = doesFileExist(this.app, `${location}/${filename}`)
         if (file) {

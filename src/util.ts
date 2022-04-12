@@ -148,7 +148,7 @@ export const createPollTable = (polls: Poll[]): string[] => {
  * Filename sanitization. Credit: parshap/node-sanitize-filename
  * Rewrite to allow functionality on Obsidian mobile.
  */
-const illegalRe = /[/?<>\\:*|"]/g
+const illegalRe = /[?<>\\:*|"]/g
 // eslint-disable-next-line no-control-regex
 const controlRe = /[\x00-\x1f\x80-\x9f]/g
 const reservedRe = /^\.+$/
@@ -163,7 +163,8 @@ const windowsTrailingRe = /[. ]+$/
  */
 export const sanitizeFilename = (
   filename: string,
-  alter: 'encode' | 'decode' | 'none' = 'none'
+  alter: 'encode' | 'decode' | 'none' = 'none',
+  type: 'file' | 'directory' = 'file'
 ): string => {
   filename = filename
     .replace(illegalRe, '')
@@ -171,6 +172,9 @@ export const sanitizeFilename = (
     .replace(reservedRe, '')
     .replace(windowsReservedRe, '')
     .replace(windowsTrailingRe, '')
+  if (type === 'file') {
+    filename = filename.replace('/', '')
+  }
   if (alter === 'decode') {
     filename = decodeURI(filename)
   } else if (alter === 'encode') {
@@ -225,10 +229,11 @@ export const createMediaElements = (
         const alter =
           settings.imageEmbedStyle === 'markdown' ? 'encode' : 'decode'
         const filepath = normalizePath(
-          `${sanitizeFilename(assetLocation, alter)}/${sanitizeFilename(
-            medium.media_key,
-            alter
-          )}.jpg`
+          `${sanitizeFilename(
+            assetLocation,
+            alter,
+            'directory'
+          )}/${sanitizeFilename(medium.media_key, alter)}.jpg`
         )
         switch (medium.type) {
           case 'photo':
@@ -331,7 +336,7 @@ export const buildMarkdown = async (
       plugin.settings.downloadAssets
     const alter = obsidianImageEmbeds ? 'decode' : 'encode'
     const filename = `${normalizePath(
-      `${sanitizeFilename(assetPath, alter)}/${sanitizeFilename(
+      `${sanitizeFilename(assetPath, alter, 'directory')}/${sanitizeFilename(
         user.username,
         alter
       )}-${user.id}.jpg`
@@ -444,7 +449,8 @@ export const downloadImages = (
 ): void => {
   const assetLocation = sanitizeFilename(
     plugin.settings.assetLocation || 'assets',
-    'decode'
+    'decode',
+    'directory'
   )
   const user = tweet.includes.users[0]
 
@@ -588,7 +594,11 @@ export const pasteTweet = async (
   } else {
     let filename = createFilename(plugin.currentTweet, plugin.settings.filename)
     filename = sanitizeFilename(filename, 'decode')
-    const location = sanitizeFilename(plugin.settings.noteLocation, 'decode')
+    const location = sanitizeFilename(
+      plugin.settings.noteLocation,
+      'decode',
+      'directory'
+    )
     const fileExists = doesFileExist(plugin.app, `${location}/${filename}`)
     if (fileExists) {
       // just unique-ify the title for now
