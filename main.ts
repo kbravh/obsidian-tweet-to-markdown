@@ -1,7 +1,7 @@
 import {addIcon, Editor, MarkdownView, Plugin} from 'obsidian'
 import {DEFAULT_SETTINGS, TTMSettings, TTMSettingTab} from 'src/settings'
 import {pasteTweet} from 'src/util'
-import {Tweet} from 'src/models'
+import {Tweet} from 'src/types/models'
 import {TweetCompleteModal} from 'src/TweetCompleteModal'
 import {TweetUrlModal} from 'src/TweetUrlModal'
 

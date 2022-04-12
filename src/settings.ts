@@ -1,5 +1,6 @@
 import {App, moment, Platform, PluginSettingTab, Setting} from 'obsidian'
 import TTM from 'main'
+import {TweetCompleteAction, TweetCompleteActions} from './types/plugin'
 
 export interface TTMSettings {
   bearerToken: string | null
@@ -8,6 +9,7 @@ export interface TTMSettings {
   imageEmbedStyle: 'markdown' | 'obsidian'
   assetLocation: string | null
   filename: string | null
+  tweetCompleteAction: TweetCompleteAction
   tweetLinkFetch: boolean
   embedMethod: 'text' | 'obsidian'
   frontmatter: boolean
@@ -28,6 +30,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   imageEmbedStyle: 'markdown',
   assetLocation: '',
   filename: null,
+  tweetCompleteAction: TweetCompleteActions.newTab,
   tweetLinkFetch: false,
   embedMethod: 'obsidian',
   frontmatter: true,
@@ -154,6 +157,25 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.filename)
           .onChange(async value => {
             this.plugin.settings.filename = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Open tweet once downloaded')
+      .setDesc(
+        'How (or whether) to open the tweet once it is finished downloading.'
+      )
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions({
+            [TweetCompleteActions.newTab]: 'New tab',
+            [TweetCompleteActions.activeWindow]: 'Active window',
+            [TweetCompleteActions.never]: 'Do not open',
+          })
+          .setValue(this.plugin.settings.tweetCompleteAction)
+          .onChange(async (value: TweetCompleteAction) => {
+            this.plugin.settings.tweetCompleteAction = value
             await this.plugin.saveSettings()
           })
       )
