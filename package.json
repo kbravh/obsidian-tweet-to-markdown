@@ -10,7 +10,7 @@
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production",
     "lint": "npx eslint ./src --ext .ts",
-    "test": "vitest"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -19,15 +19,16 @@
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^13.0.6",
     "@rollup/plugin-typescript": "^8.2.1",
+    "@types/jest": "^27.4.1",
     "@types/node": "^14.14.37",
     "@types/uuid": "^8.3.3",
     "gts": "^3.1.0",
+    "jest": "^27.5.1",
     "obsidian": "^0.12.17",
     "rollup": "^2.32.1",
+    "ts-jest": "^27.1.4",
     "tslib": "^2.2.0",
-    "typescript": "^4.2.4",
-    "vite": "^2.9.1",
-    "vitest": "^0.9.3"
+    "typescript": "^4.6.3"
   },
   "dependencies": {
     "core-js": "^3.20.2",
