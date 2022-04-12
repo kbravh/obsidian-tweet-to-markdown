@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js --environment BUILD:production",
-    "lint": "npx eslint ./src --ext .ts"
+    "lint": "npx eslint ./src --ext .ts",
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
