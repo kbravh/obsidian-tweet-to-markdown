@@ -10,7 +10,7 @@ import {
   TAbstractFile,
 } from 'obsidian'
 import {createDownloadManager, DownloadManager} from './downloadManager'
-import type {Media, Poll, Tweet} from './models'
+import type {Media, Poll, Tweet} from './types/tweet'
 import {decode} from 'html-entities'
 import {moment} from 'obsidian'
 import TTM from 'main'
