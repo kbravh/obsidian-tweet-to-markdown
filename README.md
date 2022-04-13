@@ -98,6 +98,9 @@ Tweet images will be automatically saved to the directory `assets/`. If you'd li
 
 Nota bene: Unfortunately, there is currently not a way to retrieve gifs or videos from tweets using the v2 API.
 
+### Open tweet once downloaded
+Once the tweet finishes downloading and the file is created, this determines how (or if) the file will be opened. You can choose to have the tweet open in a new tab, replace the current note in the active tab, or not open at all. The default is to open in a new tab.
+
 ## Note customization
 There are some options to customize the output of the note.
 
