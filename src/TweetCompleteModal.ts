@@ -1,6 +1,7 @@
 import {App, Modal, Notice, Setting} from 'obsidian'
 import {createFilename, doesFileExist, sanitizeFilename} from './util'
 import TTM from 'main'
+import {TweetCompleteActions} from './types/plugin'
 
 export class TweetCompleteModal extends Modal {
   plugin: TTM
@@ -69,12 +70,30 @@ export class TweetCompleteModal extends Modal {
           this.plugin.currentTweetMarkdown.replace(/\n{2,}/g, '\n\n')
 
         // write the note to file
-        await this.app.vault.create(
+        const newFile = await this.app.vault.create(
           `${location}/${filename}`,
           this.plugin.currentTweetMarkdown
         )
 
         new Notice(`${filename} created.`)
+
+        switch (this.plugin.settings.tweetCompleteAction) {
+          case TweetCompleteActions.activeWindow: {
+            const leaf = this.app.workspace.activeLeaf
+            leaf.openFile(newFile)
+            break
+          }
+          case TweetCompleteActions.newTab: {
+            const leaf = this.app.workspace.activeLeaf
+            const newLeaf = this.app.workspace.createLeafBySplit(leaf)
+            newLeaf.openFile(newFile)
+            break
+          }
+          case TweetCompleteActions.never:
+            break
+          default:
+            break
+        }
         this.close()
       })
     })
