@@ -1,6 +1,7 @@
 import {App, moment, Platform, PluginSettingTab, Setting} from 'obsidian'
-import TTM from 'main'
 import {TweetCompleteAction, TweetCompleteActions} from './types/plugin'
+import {FolderSuggest} from './suggester/folderSuggester'
+import TTM from 'main'
 
 export interface TTMSettings {
   bearerToken: string | null
@@ -25,10 +26,10 @@ export interface TTMSettings {
 
 export const DEFAULT_SETTINGS: TTMSettings = {
   bearerToken: null,
-  noteLocation: '',
+  noteLocation: '/',
   downloadAssets: false,
   imageEmbedStyle: 'markdown',
-  assetLocation: '',
+  assetLocation: 'assets',
   filename: null,
   tweetCompleteAction: TweetCompleteActions.newTab,
   tweetLinkFetch: false,
@@ -81,15 +82,16 @@ export class TTMSettingTab extends PluginSettingTab {
       .setDesc(
         'Where to store the created notes. Defaults to the root of the vault.'
       )
-      .addText(text =>
-        text
-          .setPlaceholder('.')
+      .addSearch(search => {
+        new FolderSuggest(this.app, search.inputEl)
+        search
+          .setPlaceholder('Example: notes/tweets')
           .setValue(this.plugin.settings.noteLocation)
           .onChange(async value => {
             this.plugin.settings.noteLocation = value
             await this.plugin.saveSettings()
           })
-      )
+      })
 
     new Setting(containerEl)
       .setName('Include images')
@@ -118,15 +120,16 @@ export class TTMSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Image Location')
       .setDesc('Where to store the downloaded images. Defaults to `assets/`.')
-      .addText(text =>
-        text
-          .setPlaceholder('assets/')
+      .addSearch(search => {
+        new FolderSuggest(this.app, search.inputEl)
+        search
+          .setPlaceholder('Example: assets/tweets')
           .setValue(this.plugin.settings.assetLocation)
           .onChange(async value => {
             this.plugin.settings.assetLocation = value
             await this.plugin.saveSettings()
           })
-      )
+      })
 
     new Setting(containerEl)
       .setName('Image embed style')
