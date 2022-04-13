@@ -26,10 +26,10 @@ export interface TTMSettings {
 
 export const DEFAULT_SETTINGS: TTMSettings = {
   bearerToken: null,
-  noteLocation: '/',
+  noteLocation: '',
   downloadAssets: false,
   imageEmbedStyle: 'markdown',
-  assetLocation: 'assets',
+  assetLocation: '',
   filename: null,
   tweetCompleteAction: TweetCompleteActions.newTab,
   tweetLinkFetch: false,
