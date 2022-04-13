@@ -85,8 +85,13 @@ export class TweetCompleteModal extends Modal {
           }
           case TweetCompleteActions.newTab: {
             const leaf = this.app.workspace.activeLeaf
-            const newLeaf = this.app.workspace.createLeafBySplit(leaf)
-            newLeaf.openFile(newFile)
+            const state = leaf.getViewState()
+            if (state.type === 'empty') {
+              leaf.openFile(newFile)
+            } else {
+              const newLeaf = this.app.workspace.createLeafBySplit(leaf)
+              newLeaf.openFile(newFile)
+            }
             break
           }
           case TweetCompleteActions.never:
