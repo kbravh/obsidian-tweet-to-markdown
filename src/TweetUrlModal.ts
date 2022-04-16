@@ -149,10 +149,10 @@ export class TweetUrlModal extends Modal {
                   index === 0 ? null : tweets[index - 1].includes.users[0]
                 )
               } catch (error) {
-                console.log(error)
                 new Notice(
                   'There was a problem processing the downloaded tweet'
                 )
+                console.error(error)
               }
               return markdown
             })
