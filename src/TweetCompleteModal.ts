@@ -66,13 +66,15 @@ export class TweetCompleteModal extends Modal {
         }
 
         // clean up excessive newlines
-        this.plugin.currentTweetMarkdown =
-          this.plugin.currentTweetMarkdown.replace(/\n{2,}/g, '\n\n')
+        this.plugin.tweetMarkdown = this.plugin.tweetMarkdown.replace(
+          /\n{2,}/g,
+          '\n\n'
+        )
 
         // write the note to file
         const newFile = await this.app.vault.create(
           `${location}/${filename}`,
-          this.plugin.currentTweetMarkdown
+          this.plugin.tweetMarkdown
         )
 
         new Notice(`${filename} created.`)
@@ -111,6 +113,6 @@ export class TweetCompleteModal extends Modal {
 
     // clean up
     this.plugin.currentTweet = null
-    this.plugin.currentTweetMarkdown = ''
+    this.plugin.tweetMarkdown = ''
   }
 }

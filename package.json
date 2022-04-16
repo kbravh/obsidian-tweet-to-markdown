@@ -1,6 +1,6 @@
 {
   "name": "obsidian-tweet-to-markdown",
-  "version": "2.4.2",
+  "version": "2.5.0",
   "description": "Save tweets as beautiful markdown files in Obsidian (https://obsidian.md)",
   "main": "main.js",
   "engines": {

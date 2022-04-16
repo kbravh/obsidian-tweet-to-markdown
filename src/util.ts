@@ -10,7 +10,7 @@ import {
   TAbstractFile,
 } from 'obsidian'
 import {createDownloadManager, DownloadManager} from './downloadManager'
-import type {Media, Poll, Tweet} from './types/tweet'
+import type {Media, Poll, Tweet, User} from './types/tweet'
 import {decode} from 'html-entities'
 import {moment} from 'obsidian'
 import TTM from 'main'
@@ -265,17 +265,30 @@ export const buildMarkdown = async (
   plugin: TTM,
   downloadManager: DownloadManager,
   tweet: Tweet,
-  type: 'normal' | 'embed' | 'thread' | 'quoted' = 'normal'
+  type: 'normal' | 'embed' | 'thread' | 'quoted' = 'normal',
+  previousAuthor?: User
 ): Promise<string> => {
+  if (type === 'thread' && !previousAuthor) {
+    throw new Error('A thread tweet must have a previous author')
+  }
+
+  let text = decode(tweet.data.text)
+  const user = tweet.includes.users[0]
+
+  const isCondensedThreadTweet = !(
+    type !== 'thread' ||
+    (type === 'thread' && !plugin.settings.condensedThread) ||
+    (type === 'thread' &&
+      plugin.settings.condensedThread &&
+      user.id !== previousAuthor.id)
+  )
+
   let metrics: string[] = []
   metrics = [
     `likes: ${tweet.data.public_metrics.like_count}`,
     `retweets: ${tweet.data.public_metrics.retweet_count}`,
     `replies: ${tweet.data.public_metrics.reply_count}`,
   ]
-
-  let text = decode(tweet.data.text)
-  const user = tweet.includes.users[0]
 
   /**
    * replace entities with markdown links
@@ -331,31 +344,36 @@ export const buildMarkdown = async (
   const assetPath = decodeURI(plugin.settings.assetLocation || 'assets')
   let markdown = []
   if (plugin.settings.avatars) {
-    const obsidianImageEmbeds =
-      plugin.settings.imageEmbedStyle === 'obsidian' &&
-      plugin.settings.downloadAssets
-    const alter = obsidianImageEmbeds ? 'decode' : 'encode'
-    const filename = `${normalizePath(
-      `${sanitizeFilename(assetPath, alter, 'directory')}/${sanitizeFilename(
-        user.username,
-        alter
-      )}-${user.id}.jpg`
-    )}`
-    if (obsidianImageEmbeds) {
-      markdown.push(`![[${filename}]]`)
-    } else {
-      markdown.push(
-        `![${user.username}](${
-          plugin.settings.downloadAssets ? filename : user.profile_image_url
-        })` // profile image
-      )
+    if (!isCondensedThreadTweet) {
+      const obsidianImageEmbeds =
+        plugin.settings.imageEmbedStyle === 'obsidian' &&
+        plugin.settings.downloadAssets
+      const alter = obsidianImageEmbeds ? 'decode' : 'encode'
+      const filename = `${normalizePath(
+        `${sanitizeFilename(assetPath, alter, 'directory')}/${sanitizeFilename(
+          user.username,
+          alter
+        )}-${user.id}.jpg`
+      )}`
+      if (obsidianImageEmbeds) {
+        markdown.push(`![[${filename}]]`)
+      } else {
+        markdown.push(
+          `![${user.username}](${
+            plugin.settings.downloadAssets ? filename : user.profile_image_url
+          })` // profile image
+        )
+      }
     }
   }
-  if (!plugin.settings.includeLinks) {
+
+  if (isCondensedThreadTweet) {
+    markdown.push(text)
+  } else if (!plugin.settings.includeLinks) {
     markdown.push(
       `${user.name} (${user.username})${displayDate(plugin, date)}`, // name, handle, and date
       '\n',
-      `${text}`
+      text
     )
   } else {
     markdown.push(
@@ -363,7 +381,7 @@ export const buildMarkdown = async (
         user.username
       }))${displayDate(plugin, date)}`, // name, handle, and date
       '\n',
-      `${text}`
+      text
     ) // text of the tweet
   }
 
@@ -409,7 +427,7 @@ export const buildMarkdown = async (
   }
 
   // add original tweet link to end of tweet
-  if (plugin.settings.includeLinks) {
+  if (plugin.settings.includeLinks && !plugin.settings.condensedThread) {
     markdown.push(
       '',
       '',
@@ -433,7 +451,7 @@ export const buildMarkdown = async (
     case 'embed':
       return markdown.join('\n')
     case 'thread':
-      return '\n\n---\n\n' + markdown.join('\n')
+      return markdown.join('\n')
     case 'quoted':
       return '\n\n' + markdown.join('\n')
     default:
@@ -507,7 +525,7 @@ export const downloadImages = (
 export const pasteTweet = async (
   event: ClipboardEvent,
   editor: Editor,
-  markdownView: MarkdownView,
+  _: MarkdownView,
   plugin: TTM
 ): Promise<void> => {
   // early escapes
@@ -542,9 +560,11 @@ export const pasteTweet = async (
   const placeholder = `Fetching tweet ${id}...`
   editor.replaceSelection(placeholder)
 
+  let tweet: Tweet
+
   const downloadManager = createDownloadManager()
   try {
-    plugin.currentTweet = await getTweet(id, bearerToken)
+    tweet = await getTweet(id, bearerToken)
   } catch (error) {
     let text = editor.getValue()
     text = text.replace(placeholder, `Error retrieving tweet: ${clipboardText}`)
@@ -557,22 +577,17 @@ export const pasteTweet = async (
       plugin.app,
       plugin,
       downloadManager,
-      plugin.currentTweet,
+      tweet,
       'embed'
     )
   } catch (error) {
     new Notice('There was a problem processing the downloaded tweet')
-    plugin.currentTweet = null
+    tweet = null
     return
   }
 
-  plugin.currentTweetMarkdown = markdown + plugin.currentTweetMarkdown
-
   // clean up excessive newlines
-  plugin.currentTweetMarkdown = plugin.currentTweetMarkdown.replace(
-    /\n{2,}/g,
-    '\n\n'
-  )
+  markdown = markdown.replace(/\n{2,}/g, '\n\n')
 
   await downloadManager
     .finishDownloads()
@@ -590,9 +605,9 @@ export const pasteTweet = async (
   let text = editor.getValue()
 
   if (plugin.settings.embedMethod === 'text') {
-    text = text.replace(placeholder, plugin.currentTweetMarkdown)
+    text = text.replace(placeholder, markdown)
   } else {
-    let filename = createFilename(plugin.currentTweet, plugin.settings.filename)
+    let filename = createFilename(tweet, plugin.settings.filename)
     filename = sanitizeFilename(filename, 'decode')
     const location = sanitizeFilename(
       plugin.settings.noteLocation,
@@ -618,17 +633,14 @@ export const pasteTweet = async (
       }
     }
     const sanitizedFilename = `${location}/${filename}`
-    await plugin.app.vault.create(
-      sanitizedFilename,
-      plugin.currentTweetMarkdown
-    )
+    await plugin.app.vault.create(sanitizedFilename, markdown)
     text = text.replace(placeholder, `![[${filename}]]`)
   }
 
   editor.setValue(text)
   // cleanup
-  plugin.currentTweet = null
-  plugin.currentTweetMarkdown = ''
+  tweet = null
+  markdown = ''
 }
 
 export const isTwitterUrl = (text: string): boolean =>
@@ -671,6 +683,5 @@ export const getBearerToken = (plugin: TTM): string => {
 }
 
 export const tweetStateCleanup = (plugin: TTM): void => {
-  plugin.currentTweet = null
-  plugin.currentTweetMarkdown = ''
+  plugin.tweetMarkdown = ''
 }

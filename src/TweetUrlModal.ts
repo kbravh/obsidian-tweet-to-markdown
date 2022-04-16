@@ -9,6 +9,7 @@ import {
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import TTM from 'main'
 import {TweetCompleteModal} from './TweetCompleteModal'
+import {Tweet} from './types/tweet'
 
 export class TweetUrlModal extends Modal {
   url = ''
@@ -77,16 +78,17 @@ export class TweetUrlModal extends Modal {
 
           this.downloadManager = createDownloadManager()
 
-          // reset thread count
-          this.plugin.threadCount = 0
-
           // set the button as loading
           button.setButtonText('Loading...')
           button.setDisabled(true)
 
+          let threadCount = 0
+          const tweets: Tweet[] = []
+          let currentTweet: Tweet
+
           // fetch tweet
           try {
-            this.plugin.currentTweet = await getTweet(id, bearerToken)
+            currentTweet = await getTweet(id, bearerToken)
           } catch (error) {
             new Notice(error.message)
             // set the button as not loading
@@ -94,49 +96,21 @@ export class TweetUrlModal extends Modal {
             button.setDisabled(false)
             return
           }
-          this.plugin.currentTweetMarkdown = ''
-          button.setButtonText(`${++this.plugin.threadCount} tweet fetched...`)
+          tweets.push(currentTweet)
+          button.setButtonText(`${++threadCount} tweet fetched...`)
 
           // special handling for threads
           if (this.thread) {
             // check if this is the head tweet
-            while (
-              this.plugin.currentTweet.data.conversation_id !==
-              this.plugin.currentTweet.data.id
-            ) {
-              let markdown
-              try {
-                markdown = await buildMarkdown(
-                  this.app,
-                  this.plugin,
-                  this.downloadManager,
-                  this.plugin.currentTweet,
-                  'thread'
-                )
-              } catch (error) {
-                new Notice(
-                  'There was a problem processing the downloaded tweet'
-                )
-                // set the button as not loading
-                button.setButtonText('Download Tweet')
-                button.setDisabled(false)
-                return
-              }
-              this.plugin.currentTweetMarkdown =
-                markdown + this.plugin.currentTweetMarkdown
+            while (currentTweet.data.conversation_id !== currentTweet.data.id) {
               // load in parent tweet
-              const [parent_tweet] =
-                this.plugin.currentTweet.data.referenced_tweets.filter(
-                  ref_tweet => ref_tweet.type === 'replied_to'
-                )
+              const [parent_tweet] = currentTweet.data.referenced_tweets.filter(
+                ref_tweet => ref_tweet.type === 'replied_to'
+              )
               try {
-                this.plugin.currentTweet = await getTweet(
-                  parent_tweet.id,
-                  bearerToken
-                )
-                button.setButtonText(
-                  `${++this.plugin.threadCount} tweets fetched...`
-                )
+                currentTweet = await getTweet(parent_tweet.id, bearerToken)
+                tweets.push(currentTweet)
+                button.setButtonText(`${++threadCount} tweets fetched...`)
               } catch (error) {
                 if (
                   error.message.includes(
@@ -149,7 +123,7 @@ export class TweetUrlModal extends Modal {
                 } else {
                   new Notice(error.message)
                 }
-                tweetStateCleanup(this.plugin)
+                this.plugin.tweetMarkdown = ''
                 // set the button as not loading
                 button.setButtonText('Download Tweet')
                 button.setDisabled(false)
@@ -158,19 +132,50 @@ export class TweetUrlModal extends Modal {
             }
           }
 
-          let markdown
-          try {
-            markdown = await buildMarkdown(
-              this.app,
-              this.plugin,
-              this.downloadManager,
-              this.plugin.currentTweet
+          // reverse the thread so the tweets are in chronological order
+          tweets.reverse()
+          this.plugin.tweetMarkdown = ''
+
+          const markdownsOrMarksdown = await Promise.all(
+            tweets.map(async (tweet, index) => {
+              let markdown
+              try {
+                markdown = await buildMarkdown(
+                  this.app,
+                  this.plugin,
+                  this.downloadManager,
+                  tweet,
+                  index === 0 ? 'normal' : 'thread',
+                  index === 0 ? null : tweets[index - 1].includes.users[0]
+                )
+              } catch (error) {
+                new Notice(
+                  'There was a problem processing the downloaded tweet'
+                )
+                console.error(error)
+              }
+              return markdown
+            })
+          )
+
+          const firstTweet = tweets[0]
+          this.plugin.currentTweet = firstTweet
+
+          if (
+            this.thread &&
+            this.plugin.settings.condensedThread &&
+            this.plugin.settings.includeLinks
+          ) {
+            markdownsOrMarksdown.push(
+              '',
+              '',
+              `[Thread link](https://twitter.com/${firstTweet.includes.users[0].username}/status/${firstTweet.data.id})`
             )
-          } catch (error) {
-            new Notice('There was a problem processing the downloaded tweet')
           }
-          this.plugin.currentTweetMarkdown =
-            markdown + this.plugin.currentTweetMarkdown
+
+          this.plugin.tweetMarkdown = this.plugin.settings.condensedThread
+            ? markdownsOrMarksdown.join('\n\n')
+            : markdownsOrMarksdown.join('\n\n---\n\n')
 
           await this.downloadManager
             .finishDownloads()
@@ -192,7 +197,7 @@ export class TweetUrlModal extends Modal {
     const {contentEl, titleEl} = this
     titleEl.empty()
     contentEl.empty()
-    if (this.plugin.currentTweetMarkdown) {
+    if (this.plugin.tweetMarkdown) {
       this.plugin.tweetComplete = new TweetCompleteModal(
         this.plugin.app,
         this.plugin
