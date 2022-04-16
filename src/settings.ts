@@ -15,6 +15,7 @@ export interface TTMSettings {
   embedMethod: 'text' | 'obsidian'
   frontmatter: boolean
   avatars: boolean
+  condensedThread: boolean
   /** @deprecated - split into includeImages and includeLinks */
   textOnly: boolean
   includeImages: boolean
@@ -36,6 +37,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   embedMethod: 'obsidian',
   frontmatter: true,
   avatars: true,
+  condensedThread: false,
   textOnly: false,
   includeImages: true,
   includeLinks: true,
@@ -179,6 +181,20 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.tweetCompleteAction)
           .onChange(async (value: TweetCompleteAction) => {
             this.plugin.settings.tweetCompleteAction = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Condensed threads')
+      .setDesc(
+        'For tweet threads, only show author information on the first tweet in the thread (or if a new author appears).'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.condensedThread)
+          .onChange(async value => {
+            this.plugin.settings.condensedThread = value
             await this.plugin.saveSettings()
           })
       )

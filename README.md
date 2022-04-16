@@ -116,6 +116,11 @@ By default, a frontmatter block will be included when the tweet is downloaded. T
 
 You can toggle this frontmatter block off to not include it when downloading tweets.
 
+### Condensed threads
+Instead of showing complete, individual tweets with profile picture, date, etc. when downloading a thread, this option will show the header once and then only show the tweet bodies, representing tweet threads as a cohesive body of text. A header will be shown if a different author appears in the thread, for example if you're downloading a conversation between various authors.
+
+![A regular thread next to a condensed thread](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/condensed_thread.png)
+
 ### Author profile pictures
 By default, the tweet author's profile picture will be included with the downloaded tweet. To exclude it, disable the **Include profile pictures** in the plugin settings.
 
