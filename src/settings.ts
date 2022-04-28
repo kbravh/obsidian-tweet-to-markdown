@@ -14,6 +14,9 @@ export interface TTMSettings {
   tweetLinkFetch: boolean
   embedMethod: 'text' | 'obsidian'
   frontmatter: boolean
+  tags: string[]
+  cssclass: string
+  freeformFrontmatter: string[]
   avatars: boolean
   condensedThread: boolean
   /** @deprecated - split into includeImages and includeLinks */
@@ -36,6 +39,9 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   tweetLinkFetch: false,
   embedMethod: 'obsidian',
   frontmatter: true,
+  tags: [],
+  cssclass: '',
+  freeformFrontmatter: [],
   avatars: true,
   condensedThread: false,
   textOnly: false,
@@ -209,6 +215,50 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.frontmatter)
           .onChange(async value => {
             this.plugin.settings.frontmatter = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Tags')
+      .setDesc(
+        "A space-separated list of tags you'd like to include in the frontmatter."
+      )
+      .addText(text =>
+        text
+          .setValue(this.plugin.settings.tags.join(' '))
+          .setPlaceholder('literature-note tweet')
+          .onChange(async value => {
+            const tags = value.split(' ').filter(tag => !!tag)
+            this.plugin.settings.tags = tags
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('cssclass')
+      .setDesc(
+        'A `cssclass` field to include in the frontmatter. Obsidian will apply this class to tweet notes for CSS styling.'
+      )
+      .addText(text =>
+        text.setValue(this.plugin.settings.cssclass).onChange(async value => {
+          this.plugin.settings.cssclass = value
+          await this.plugin.saveSettings()
+        })
+      )
+
+    new Setting(containerEl)
+      .setName('Freeform frontmatter')
+      .setDesc(
+        "Have any custom frontmatter fields you'd like to apply to your tweet notes? Write them here, each rule on a new line."
+      )
+      .addTextArea(textarea =>
+        textarea
+          .setValue(this.plugin.settings.freeformFrontmatter.join('\n'))
+          .setPlaceholder('newfield: value\nanother: another value')
+          .onChange(async value => {
+            const freeform = value.split('\n').filter(line => !!line)
+            this.plugin.settings.freeformFrontmatter = freeform
             await this.plugin.saveSettings()
           })
       )
