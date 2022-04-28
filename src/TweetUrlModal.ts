@@ -1,15 +1,9 @@
 import {App, Modal, Notice, Setting} from 'obsidian'
-import {
-  buildMarkdown,
-  getBearerToken,
-  getTweet,
-  getTweetID,
-  tweetStateCleanup,
-} from './util'
+import {buildMarkdown, getBearerToken, getTweet, getTweetID} from './util'
 import {createDownloadManager, DownloadManager} from './downloadManager'
 import TTM from 'main'
-import {TweetCompleteModal} from './TweetCompleteModal'
 import {Tweet} from './types/tweet'
+import {TweetCompleteModal} from './TweetCompleteModal'
 
 export class TweetUrlModal extends Modal {
   url = ''
