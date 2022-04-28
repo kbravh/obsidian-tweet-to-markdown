@@ -116,6 +116,19 @@ By default, a frontmatter block will be included when the tweet is downloaded. T
 
 You can toggle this frontmatter block off to not include it when downloading tweets.
 
+#### Tags
+You can provide a list of tags here separated by spaces. These will be included in the frontmatter as `tags: ["tag1", "tag2", ...]` and will be searchable via Obsidian.
+
+#### cssclass
+If you add a class name here, it will be added to the frontmatter as `cssclass: classname` and Obsidian will apply that class to each of your new tweet notes. You can then style those notes using CSS and targeting that class name.
+
+#### Freeform frontmatter
+Do you have some other custom frontmatter field you'd like applied to all of your tweet notes? Enter any of those fields here, one per line, and they'll be added to your new tweet notes.
+```yaml
+field: new field value
+another: second value
+```
+
 ### Condensed threads
 Instead of showing complete, individual tweets with profile picture, date, etc. when downloading a thread, this option will show the header once and then only show the tweet bodies, representing tweet threads as a cohesive body of text. A header will be shown if a different author appears in the thread, for example if you're downloading a conversation between various authors.
 

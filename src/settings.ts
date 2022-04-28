@@ -257,7 +257,8 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.freeformFrontmatter.join('\n'))
           .setPlaceholder('newfield: value\nanother: another value')
           .onChange(async value => {
-            this.plugin.settings.freeformFrontmatter = value.split('\n')
+            const freeform = value.split('\n').filter(line => !!line)
+            this.plugin.settings.freeformFrontmatter = freeform
             await this.plugin.saveSettings()
           })
       )
