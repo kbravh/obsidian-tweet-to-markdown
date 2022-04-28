@@ -238,7 +238,28 @@ export class TTMSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('cssclass')
       .setDesc(
-        'A `cssclass` field to include in the frontmatter. Obsidian will apply this class to tweet notes.'
+        'A `cssclass` field to include in the frontmatter. Obsidian will apply this class to tweet notes for CSS styling.'
+      )
+      .addText(text =>
+        text.setValue(this.plugin.settings.cssclass).onChange(async value => {
+          this.plugin.settings.cssclass = value
+          await this.plugin.saveSettings()
+        })
+      )
+
+    new Setting(containerEl)
+      .setName('Freeform frontmatter')
+      .setDesc(
+        "Have any custom frontmatter fields you'd like to apply to your tweet notes? Write them here, each rule on a new line."
+      )
+      .addTextArea(textarea =>
+        textarea
+          .setValue(this.plugin.settings.freeformFrontmatter)
+          .setPlaceholder('newfield: value\nanother: another value')
+          .onChange(async value => {
+            this.plugin.settings.freeformFrontmatter = value
+            await this.plugin.saveSettings()
+          })
       )
 
     new Setting(containerEl)
