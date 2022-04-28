@@ -329,17 +329,32 @@ export const buildMarkdown = async (
   /**
    * Define the frontmatter as the name, handle, and source url
    */
-  const frontmatter = plugin.settings.frontmatter
-    ? [
+  const frontmatter = []
+  if (plugin.settings.frontmatter) {
+    frontmatter.push(
+      ...[
         '---',
         `author: "${user.name}"`,
         `handle: "@${user.username}"`,
         `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
         `date: "${date}"`,
         ...metrics,
-        '---',
       ]
-    : []
+    )
+    if (plugin.settings.cssclass) {
+      frontmatter.push(`cssclass: ${plugin.settings.cssclass}`)
+    }
+    if (plugin.settings.tags.length) {
+      frontmatter.push(
+        `tags: [${plugin.settings.tags.map(tag => `"${tag}"`).join(', ')}]`
+      )
+    }
+    if (plugin.settings.freeformFrontmatter.length) {
+      frontmatter.push(...plugin.settings.freeformFrontmatter)
+    }
+    // close out frontmatter
+    frontmatter.push('---')
+  }
 
   const assetPath = decodeURI(plugin.settings.assetLocation || 'assets')
   let markdown = []

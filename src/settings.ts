@@ -16,7 +16,7 @@ export interface TTMSettings {
   frontmatter: boolean
   tags: string[]
   cssclass: string
-  freeformFrontmatter: string
+  freeformFrontmatter: string[]
   avatars: boolean
   condensedThread: boolean
   /** @deprecated - split into includeImages and includeLinks */
@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   frontmatter: true,
   tags: [],
   cssclass: '',
-  freeformFrontmatter: '',
+  freeformFrontmatter: [],
   avatars: true,
   condensedThread: false,
   textOnly: false,
@@ -254,10 +254,10 @@ export class TTMSettingTab extends PluginSettingTab {
       )
       .addTextArea(textarea =>
         textarea
-          .setValue(this.plugin.settings.freeformFrontmatter)
+          .setValue(this.plugin.settings.freeformFrontmatter.join('\n'))
           .setPlaceholder('newfield: value\nanother: another value')
           .onChange(async value => {
-            this.plugin.settings.freeformFrontmatter = value
+            this.plugin.settings.freeformFrontmatter = value.split('\n')
             await this.plugin.saveSettings()
           })
       )
