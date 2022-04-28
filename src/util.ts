@@ -578,7 +578,7 @@ export const pasteTweet = async (
       plugin,
       downloadManager,
       tweet,
-      'embed'
+      plugin.settings.embedMethod === 'text' ? 'embed' : 'normal'
     )
   } catch (error) {
     new Notice('There was a problem processing the downloaded tweet')
