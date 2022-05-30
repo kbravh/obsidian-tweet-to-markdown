@@ -19,7 +19,7 @@ export interface Data {
   public_metrics: Metrics
   entities?: Entities
   conversation_id?: string
-  attachments?: Attachment[]
+  attachments?: Attachment
   referenced_tweets?: ReferencedTweet[]
 }
 
@@ -35,6 +35,12 @@ export interface Error {
   detail: string
 }
 
+export interface Includes {
+  polls?: Poll[]
+  users: User[]
+  media?: Media[]
+}
+
 export interface Media {
   media_key: string
   type: 'photo' | 'gif' | 'video'
@@ -43,9 +49,10 @@ export interface Media {
 }
 
 export interface Mention {
-  start: string
-  end: string
+  start: number
+  end: number
   username: string
+  id?: string
 }
 
 export interface Metrics {
@@ -53,6 +60,12 @@ export interface Metrics {
   reply_count: number
   like_count: number
   quote_count: number
+}
+
+export interface OpenGraphImage {
+  url: string
+  width: number
+  height: number
 }
 
 export interface Poll {
@@ -77,12 +90,6 @@ export interface Tag {
   tag: string
 }
 
-export interface Includes {
-  polls?: Poll[]
-  users: User[]
-  media?: Media[]
-}
-
 export interface Tweet {
   includes: Includes
   data: Data
@@ -98,6 +105,12 @@ export interface TweetURL {
   url: string
   expanded_url: string
   display_url: string
+  media_key?: string
+  images?: OpenGraphImage[]
+  status?: number
+  title?: string
+  description?: string
+  unwound_url?: string
 }
 
 export interface User {

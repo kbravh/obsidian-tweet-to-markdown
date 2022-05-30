@@ -1,4 +1,5 @@
-import {getTweetID, sanitizeFilename} from '../src/util'
+import {createFilename, getTweetID, sanitizeFilename} from '../src/util'
+import {ImageTweet} from '../__fixtures__/tweets'
 
 describe('Tweet ID', () => {
   it('Extracts tweet Id from regular URL', async () => {
@@ -27,4 +28,15 @@ describe('Sanitize filename', () => {
   it('Removes slashes from filenames', () => {
     expect(sanitizeFilename('file/name.md', 'encode')).toBe('filename.md')
   })
+})
+
+describe('Create filename', () => {
+  it('Defaults to "handle - id" if no pattern provided', () => {
+    expect(createFilename(ImageTweet)).toBe('')
+  })
+  it('Sanitizes unsafe filename characters', () => {})
+  it('Replaces handle, id, and name', () => {})
+  it('Replaces text and truncates', () => {})
+  it('Replaces date with format from settings', () => {})
+  it('Replaces date with inline format', () => {})
 })
