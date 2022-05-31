@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-unpublished-import
 export class App {}
 export class Editor {}
 export class MarkdownView {}

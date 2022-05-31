@@ -54,14 +54,23 @@ To download a tweet thread, paste the link to the **LAST** tweet in the thread, 
 
 ![The modal to download a new tweet.](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/tweet_url_modal.png)
 
-Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, `[[text]]`, and `[[id]]` when naming your file, which will be automatically replaced according to the following chart. The file extension `.md` will be added automatically.
+Once the tweet is downloaded, you'll be presented a window to set the name of the file that will be created. You can use the variables `[[handle]]`, `[[name]]`, `[[text]]`, `[[date]]`, and `[[id]]` when naming your file, which will be automatically replaced according to the following chart. The file extension `.md` will be added automatically.
 
 | Variable | Replacement |
 |:---:|---|
-|[[handle]]|The user's handle (the part that follows the @ symbol)|
-|[[name]]|The user's name|
-|[[id]]|The unique ID assigned to the tweet|
-|[[text]]|The entire text of the tweet|
+|`[[handle]]`|The user's handle (the part that follows the @ symbol)|
+|`[[name]]`|The user's name|
+|`[[id]]`|The unique ID assigned to the tweet|
+|`[[text]]`|The entire text of the tweet (truncated to fit OS filename length restrictions)|
+|`[[date]]`|The date that the tweet was created|
+
+If the `[[date]]` variable is provided, it will by default use the locale and time format defined in your [settings](https://github.com/kbravh/obsidian-tweet-to-markdown#date-format) (it's towards the bottom of this readme).
+
+- If you would like to use a different format, include it after the date with a semicolon: `[[date:LL]]`.
+- If you would like a different locale, include it after the format with another semicolon: `[[date:LL:es]]`.
+- If you want the same format as your settings but a different locale, just leave the format section blank: `[[date::es]]`.
+
+Please check the `moment` documentation for a list of all available [locales](https://github.com/moment/moment/tree/develop/src/locale) and [formats](https://momentjs.com/docs/#/displaying/format/).
 
 ![The modal to name a downloaded tweet.](https://raw.githubusercontent.com/kbravh/obsidian-tweet-to-markdown/main/images/tweet_complete_modal.png)
 
@@ -77,14 +86,23 @@ On the Tweet to Markdown settings page in Obsidian, you can customize the way th
 
 ### Custom File Name
 
-Tweets are, by default, saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, `[[text]]`, and `[[id]]` in your filename,  which will be automatically replaced according to the following chart. The file extension `.md` will be added automatically.
+Tweets are, by default, saved with the filename `[[handle]] - [[id]].md`. You can instead enter your own format in the **Filename** field using the variables `[[name]]`, `[[handle]]`, `[[text]]`, ``[[date]]`, and `[[id]]` in your filename,  which will be automatically replaced according to the following chart. The file extension `.md` will be added automatically.
 
 | Variable | Replacement |
 |:---:|---|
-|[[handle]]|The user's handle (the part that follows the @ symbol)|
-|[[name]]|The user's name|
-|[[id]]|The unique ID assigned to the tweet|
-|[[text]]|The entire text of the tweet (truncated to fit OS filename length restrictions)|
+|`[[handle]]`|The user's handle (the part that follows the @ symbol)|
+|`[[name]]`|The user's name|
+|`[[id]]`|The unique ID assigned to the tweet|
+|`[[text]]`|The entire text of the tweet (truncated to fit OS filename length restrictions)|
+|`[[date]]`|The date that the tweet was created|
+
+If the `[[date]]` variable is provided, it will by default use the locale and time format defined in your [settings](https://github.com/kbravh/obsidian-tweet-to-markdown#date-format) (it's towards the bottom of this readme).
+
+- If you would like to use a different format, include it after the date with a semicolon: `[[date:LL]]`.
+- If you would like a different locale, include it after the format with another semicolon: `[[date:LL:es]]`.
+- If you want the same format as your settings but a different locale, just leave the format section blank: `[[date::es]]`.
+
+Please check the `moment` documentation for a list of all available [locales](https://github.com/moment/moment/tree/develop/src/locale) and [formats](https://momentjs.com/docs/#/displaying/format/).
 
 ### Custom File Path
 
