@@ -5,3 +5,8 @@ export enum TweetCompleteActions {
 }
 
 export type TweetCompleteAction = keyof typeof TweetCompleteActions
+
+export type TimestampFormat = {
+  locale: string
+  format: string
+}

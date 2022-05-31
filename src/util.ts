@@ -13,6 +13,7 @@ import {createDownloadManager, DownloadManager} from './downloadManager'
 import type {Media, Poll, Tweet, User} from './types/tweet'
 import {decode} from 'html-entities'
 import {moment} from 'obsidian'
+import {TimestampFormat} from './types/plugin'
 import TTM from 'main'
 import {TTMSettings} from './settings'
 import {unicodeSubstring} from './unicodeSubstring'
@@ -199,19 +200,46 @@ export const truncateBytewise = (string: string, length: number): string => {
 
 /**
  * Creates a filename based on the tweet and the user defined options.
- * @param {Tweet} tweet - The entire tweet object from the Twitter v2 API
- * @param {filename} string - The filename provided by the user
- * @returns {string} - The filename based on tweet and options
+ * @param tweet - The entire tweet object from the Twitter v2 API
+ * @param filename - The filename provided by the user
+ * @returns - The filename based on tweet and options
  */
-export const createFilename = (tweet: Tweet, filename = ''): string => {
+export const createFilename = (
+  tweet: Tweet,
+  filename = '',
+  timestampFormat?: TimestampFormat
+): string => {
   filename = filename ? filename : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
   filename = filename.replace('[[name]]', tweet.includes.users[0].name)
   filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
   filename = filename.replace('[[id]]', tweet.data.id)
   filename = filename.replace('[[text]]', tweet.data.text)
+  // date
+  const dateRegex = /\[\[(date[:\w-]*)\]\]/
+  if (dateRegex.test(filename)) {
+    const dateCommand = filename.match(dateRegex)
+    if (dateCommand) {
+      const [, format, locale] = dateCommand[1].split(':')
+      filename = filename.replace(
+        dateRegex,
+        formatTimestamp(tweet.data.created_at, {
+          format: format || timestampFormat.format,
+          locale: locale || timestampFormat.locale,
+        })
+      )
+    }
+  }
   return sanitizeFilename(filename) + '.md'
 }
+
+export const formatTimestamp = (
+  timestamp: string,
+  timestampFormat: TimestampFormat
+): string =>
+  moment(timestamp)
+    .locale(timestampFormat.locale)
+    .format(timestampFormat.format)
 
 /**
  * Creates media links to embed media into the markdown file
@@ -320,9 +348,10 @@ export const buildMarkdown = async (
     })
   }
 
-  const date = moment(tweet.data.created_at)
-    .locale(plugin.settings.dateLocale)
-    .format(plugin.settings.dateFormat)
+  const date = formatTimestamp(tweet.data.created_at, {
+    locale: plugin.settings.dateLocale,
+    format: plugin.settings.dateFormat,
+  })
 
   const displayDate = (plugin: TTM, date: string): string =>
     plugin.settings.includeDate ? ` - ${date}` : ''
