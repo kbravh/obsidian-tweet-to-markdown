@@ -207,7 +207,7 @@ export const truncateBytewise = (string: string, length: number): string => {
 export const createFilename = (
   tweet: Tweet,
   filename = '',
-  timestampFormat?: TimestampFormat
+  timestampFormat: TimestampFormat
 ): string => {
   filename = filename ? filename : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
@@ -651,7 +651,10 @@ export const pasteTweet = async (
   if (plugin.settings.embedMethod === 'text') {
     text = text.replace(placeholder, markdown)
   } else {
-    let filename = createFilename(tweet, plugin.settings.filename)
+    let filename = createFilename(tweet, plugin.settings.filename, {
+      locale: plugin.settings.dateLocale,
+      format: plugin.settings.dateFormat,
+    })
     filename = sanitizeFilename(filename, 'decode')
     const location = sanitizeFilename(
       plugin.settings.noteLocation,

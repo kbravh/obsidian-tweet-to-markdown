@@ -41,25 +41,44 @@ describe('Sanitize filename', () => {
 
 describe('Create filename', () => {
   it('Defaults to "handle - id" if no pattern provided', () => {
-    expect(createFilename(ImageTweet)).toBe(
-      'Mappletons - 1292845757297557505.md'
-    )
+    expect(
+      createFilename(ImageTweet, '', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe('Mappletons - 1292845757297557505.md')
   })
   it('Sanitizes unsafe filename characters', () => {
-    expect(createFilename(ImageTweet, '?<>hello:*|"')).toBe('hello.md')
+    expect(
+      createFilename(ImageTweet, '?<>hello:*|"', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe('hello.md')
   })
   it('Replaces handle, id, and name', () => {
-    expect(createFilename(ImageTweet, '[[handle]] - [[id]] - [[name]]')).toBe(
-      'Mappletons - 1292845757297557505 - Maggie Appleton 🧭.md'
-    )
+    expect(
+      createFilename(ImageTweet, '[[handle]] - [[id]] - [[name]]', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe('Mappletons - 1292845757297557505 - Maggie Appleton 🧭.md')
   })
   it('Does not double extension if .md is present', () => {
     expect(
-      createFilename(ImageTweet, '[[handle]] - [[id]] - [[name]].md')
+      createFilename(ImageTweet, '[[handle]] - [[id]] - [[name]].md', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
     ).toBe('Mappletons - 1292845757297557505 - Maggie Appleton 🧭.md')
   })
   it('Replaces text and truncates', () => {
-    expect(createFilename(ImageTweet, '[[text]]')).toBe(
+    expect(
+      createFilename(ImageTweet, '[[text]]', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe(
       'Dirt is matter out of place - the loveliest definition of dirt you could hope for from anthropologist Mary Douglas in her classic 1966 book Purity and DangerHair on my head Clean. Hair on the table Dirty!Illustrating &amp; expanding on her main ideas h.md'
     )
   })
@@ -104,8 +123,11 @@ describe('Create filename', () => {
     ).toBe('Mappletons - 10 de agosto de 2020.md')
   })
   it('Partial date does not trigger date logic', () => {
-    expect(createFilename(ImageTweet, '[[date - [[handle]]')).toBe(
-      '[[date - Mappletons.md'
-    )
+    expect(
+      createFilename(ImageTweet, '[[date - [[handle]]', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe('[[date - Mappletons.md')
   })
 })

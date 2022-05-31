@@ -15,7 +15,10 @@ export class TweetCompleteModal extends Modal {
     titleEl.setText('Name tweet file')
 
     let filename = sanitizeFilename(
-      createFilename(this.plugin.currentTweet, this.plugin.settings.filename),
+      createFilename(this.plugin.currentTweet, this.plugin.settings.filename, {
+        locale: this.plugin.settings.dateLocale,
+        format: this.plugin.settings.dateFormat,
+      }),
       'decode'
     )
 
@@ -29,7 +32,10 @@ export class TweetCompleteModal extends Modal {
         input
           .onChange(value => {
             filename = sanitizeFilename(
-              createFilename(this.plugin.currentTweet, value),
+              createFilename(this.plugin.currentTweet, value, {
+                locale: this.plugin.settings.dateLocale,
+                format: this.plugin.settings.dateFormat,
+              }),
               'decode'
             )
           })
