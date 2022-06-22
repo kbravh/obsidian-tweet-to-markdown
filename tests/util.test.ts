@@ -1,5 +1,10 @@
-import {createFilename, getTweetID, sanitizeFilename} from '../src/util'
-import {ImageTweet} from '../__fixtures__/tweets'
+import {
+  createFilename,
+  getAvatarFilename,
+  getTweetID,
+  sanitizeFilename,
+} from '../src/util'
+import {ImageTweet, OldTweet} from '../__fixtures__/tweets'
 
 jest.mock('obsidian', () => {
   // eslint-disable-next-line node/no-unpublished-import
@@ -129,5 +134,14 @@ describe('Create filename', () => {
         format: 'YYYY-MM-DD',
       })
     ).toBe('[[date - Mappletons.md')
+  })
+})
+
+describe('Profile picture filenames', () => {
+  it('Makes a profile picture filename', () => {
+    const user = OldTweet.includes.users[0]
+    expect(getAvatarFilename(user)).toBe(
+      '1143604512999034881-R8BoDqiT_normal.jpg'
+    )
   })
 })

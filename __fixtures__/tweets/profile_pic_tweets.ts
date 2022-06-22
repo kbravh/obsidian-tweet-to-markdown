@@ -1,4 +1,4 @@
-export const old_tweet = {
+export const OldTweet = {
   data: {
     author_id: '1143604512999034881',
     text: 'Another valuable reference was Edition 16 of the Jamaica Philatelist magazine from 1942. https://t.co/PDFacV5JfY',
@@ -54,7 +54,7 @@ export const old_tweet = {
   },
 }
 
-export const new_tweet = {
+export const NewTweet = {
   data: {
     author_id: '1143604512999034881',
     text: 'Another valuable reference was Edition 16 of the Jamaica Philatelist magazine from 1942. https://t.co/PDFacV5JfY',
