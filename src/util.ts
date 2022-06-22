@@ -394,10 +394,9 @@ export const buildMarkdown = async (
         plugin.settings.downloadAssets
       const alter = obsidianImageEmbeds ? 'decode' : 'encode'
       const filename = `${normalizePath(
-        `${sanitizeFilename(assetPath, alter, 'directory')}/${sanitizeFilename(
-          user.username,
-          alter
-        )}-${user.id}.jpg`
+        `${sanitizeFilename(assetPath, alter, 'directory')}/${getAvatarFilename(
+          user
+        )}`
       )}`
       if (obsidianImageEmbeds) {
         markdown.push(`![[${filename}]]`)
@@ -522,9 +521,10 @@ export const downloadImages = (
   let filesToDownload = []
 
   if (plugin.settings.avatars) {
+    // concat new filename
     filesToDownload.push({
       url: user.profile_image_url,
-      title: `${user.username}-${user.id}.jpg`,
+      title: getAvatarFilename(user),
     })
   }
 
@@ -564,6 +564,14 @@ export const downloadImages = (
       )
     })
   )
+}
+
+export const getAvatarFilename = (user: User): string => {
+  // e.g. [ '', 'profile_images', '1539402405506334721', '1V5Xt64P_normal.jpg' ]
+  const urlSplit = new URL(user.profile_image_url).pathname.split('/')
+  // '1143604512999034881-1V5Xt64P_normal.jpg'
+  const title = `${user.id}-${urlSplit[urlSplit.length - 1]}`
+  return title
 }
 
 export const pasteTweet = async (
