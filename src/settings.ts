@@ -18,10 +18,12 @@ export interface TTMSettings {
   cssclass: string
   freeformFrontmatter: string[]
   avatars: boolean
+  avatarSize: string
   condensedThread: boolean
   /** @deprecated - split into includeImages and includeLinks */
   textOnly: boolean
   includeImages: boolean
+  imageSize: string
   includeLinks: boolean
   includeDate: boolean
   dateFormat: string
@@ -43,9 +45,11 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   cssclass: '',
   freeformFrontmatter: [],
   avatars: true,
+  avatarSize: '',
   condensedThread: false,
   textOnly: false,
   includeImages: true,
+  imageSize: '',
   includeLinks: true,
   includeDate: true,
   dateFormat: 'LLL',
@@ -123,6 +127,18 @@ export class TTMSettingTab extends PluginSettingTab {
             this.plugin.settings.downloadAssets = value
             await this.plugin.saveSettings()
           })
+      )
+
+    new Setting(containerEl)
+      .setName('Image size')
+      .setDesc(
+        'Set a custom size for images. Enter just the width (e.g. 200) or the width and height (e.g. 200x300).'
+      )
+      .addText(text =>
+        text.setValue(this.plugin.settings.imageSize).onChange(async value => {
+          this.plugin.settings.imageSize = value
+          await this.plugin.saveSettings()
+        })
       )
 
     new Setting(containerEl)
@@ -271,6 +287,18 @@ export class TTMSettingTab extends PluginSettingTab {
       .addToggle(toggle =>
         toggle.setValue(this.plugin.settings.avatars).onChange(async value => {
           this.plugin.settings.avatars = value
+          await this.plugin.saveSettings()
+        })
+      )
+
+    new Setting(containerEl)
+      .setName('Profile picture size')
+      .setDesc(
+        'Set a custom size for avatar images. Enter just the width (e.g. 200) or the width and height (e.g. 200x300).'
+      )
+      .addText(text =>
+        text.setValue(this.plugin.settings.avatarSize).onChange(async value => {
+          this.plugin.settings.avatarSize = value
           await this.plugin.saveSettings()
         })
       )
