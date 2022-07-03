@@ -41,10 +41,12 @@ Getting a free API key from https://ttm.kbravh.dev is the easiest method of usin
 ### Free TTM API key
 You can sign up for a free API key at https://ttm.kbravh.dev by signing in with either your GitHub or Twitter account and heading to your account page. Once you sign in and retrieve your API key from your account page, copy and paste it into the API key/bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TTM_API_KEY`.
 
+Nota bene: On Unix machines, make sure to set this environment variable in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
+
 ### Twitter Developer bearer token
 To get a bearer token from Twitter, you'll need to set up an application on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
-Nota bene: On Unix machines, make sure to set this in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
+Nota bene: On Unix machines, make sure to set this environment variable in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
 
 ### Downloading a tweet
 
@@ -155,8 +157,16 @@ Instead of showing complete, individual tweets with profile picture, date, etc. 
 ### Author profile pictures
 By default, the tweet author's profile picture will be included with the downloaded tweet. To exclude it, disable the **Include profile pictures** in the plugin settings.
 
+### Author profile picture sizes
+Following the sizing style in the [Obsidian docs](https://help.obsidian.md/How+to/Embed+files#Resize+images), you can define a custom profile picture size here. For example. to set the image width to 200 pixels, you'd input `200` in the box.
+
+Nota bene: Twitter profile pictures are 48x48 pixels. If you set a size larger than this, the image will be blurry.
+
 ### Include images
 If you'd like a slimmed down tweet, you can disable this option. It will remove all image embeds from the incoming tweets (this does not affect the author profile pictures).
+
+### Image sizes
+Following the sizing style in the [Obsidian docs](https://help.obsidian.md/How+to/Embed+files#Resize+images), you can define a custom image size here. For example. to set the image width to 200 pixels, you'd input `200` in the box.
 
 ### Include links
 Disabling this option will not hyperlink any mentions, hashtags, etc. Any links that were originally in the tweet will still be present.

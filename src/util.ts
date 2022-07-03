@@ -266,9 +266,13 @@ export const createMediaElements = (
         switch (medium.type) {
           case 'photo':
             if (settings.imageEmbedStyle === 'markdown') {
-              return `\n![${medium.alt_text ?? medium.media_key}](${filepath})`
+              return `\n![${medium.alt_text ?? medium.media_key}${
+                settings.imageSize ? `|${settings.imageSize}` : ''
+              }](${filepath})`
             } else {
-              return `\n![[${filepath}]]`
+              return `\n![[${filepath}${
+                settings.imageSize ? `|${settings.imageSize}` : ''
+              }]]`
             }
           default:
             break
@@ -276,7 +280,9 @@ export const createMediaElements = (
       } else {
         switch (medium.type) {
           case 'photo':
-            return `\n![${medium.alt_text ?? medium.media_key}](${medium.url})`
+            return `\n![${medium.alt_text ?? medium.media_key}${
+              settings.imageSize ? `|${settings.imageSize}` : ''
+            }](${medium.url})`
           default:
             break
         }
@@ -404,10 +410,16 @@ export const buildMarkdown = async (
         )}`
       )}`
       if (obsidianImageEmbeds) {
-        markdown.push(`![[${filename}]]`)
+        markdown.push(
+          `![[${filename}${
+            plugin.settings.avatarSize ? `|${plugin.settings.avatarSize}` : ''
+          }]]`
+        )
       } else {
         markdown.push(
-          `![${user.username}](${
+          `![${user.username}${
+            plugin.settings.avatarSize ? `|${plugin.settings.avatarSize}` : ''
+          }](${
             plugin.settings.downloadAssets ? filename : user.profile_image_url
           })` // profile image
         )
