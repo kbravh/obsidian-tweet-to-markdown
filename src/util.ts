@@ -360,6 +360,10 @@ export const buildMarkdown = async (
    */
   const frontmatter = []
   if (plugin.settings.frontmatter) {
+    const fetchedAt = formatTimestamp(new Date().toString(), {
+      locale: plugin.settings.dateLocale,
+      format: plugin.settings.dateFormat,
+    })
     frontmatter.push(
       ...[
         '---',
@@ -367,6 +371,7 @@ export const buildMarkdown = async (
         `handle: "@${user.username}"`,
         `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
         `date: "${date}"`,
+        `fetched: "${fetchedAt}"`,
         ...metrics,
       ]
     )
