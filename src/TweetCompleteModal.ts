@@ -59,7 +59,6 @@ export class TweetCompleteModal extends Modal {
           'decode',
           'directory'
         )
-        console.log('Location for new tweet: ' + location)
         const file = doesFileExist(this.app, `${location}/${filename}`)
         if (file) {
           new Notice(`The file ${filename} already exists`)

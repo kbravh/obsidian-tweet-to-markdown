@@ -231,8 +231,9 @@ export const createFilename = (
       )
     }
   }
-  filename = sanitizeFilename(filename)
-  return type === 'file' ? filename + '.md' : filename
+  return type === 'file'
+    ? sanitizeFilename(filename) + '.md'
+    : sanitizeFilename(filename, 'decode', 'directory')
 }
 
 export const formatTimestamp = (
