@@ -92,7 +92,7 @@ export class TTMSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Note Location')
       .setDesc(
-        'Where to store the created notes. Defaults to the root of the vault.'
+        'Where to store the created notes. You can use the placeholders [[handle]], [[name]], [[text]] and [[id]]. Defaults to the root of the vault.'
       )
       .addSearch(search => {
         new FolderSuggest(this.app, search.inputEl)
@@ -143,7 +143,9 @@ export class TTMSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Image Location')
-      .setDesc('Where to store the downloaded images. Defaults to `assets/`.')
+      .setDesc(
+        'Where to store the downloaded images. You can use the placeholders [[handle]], [[name]], [[text]] and [[id]]. Defaults to `assets/`.'
+      )
       .addSearch(search => {
         new FolderSuggest(this.app, search.inputEl)
         search
