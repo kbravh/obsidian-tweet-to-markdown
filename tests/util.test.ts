@@ -61,6 +61,27 @@ describe('Create filename', () => {
       })
     ).toBe('hello.md')
   })
+  it('Sanitizes slashes from filename', () => {
+    expect(
+      createFilename(ImageTweet, 'this/is/a/file', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe('thisisafile.md')
+  })
+  it('Does not sanitize slashes from directory', () => {
+    expect(
+      createFilename(
+        ImageTweet,
+        'this/is/a/directory',
+        {
+          locale: 'en',
+          format: 'YYYY-MM-DD',
+        },
+        'directory'
+      )
+    ).toBe('this/is/a/directory')
+  })
   it('Replaces handle, id, and name', () => {
     expect(
       createFilename(ImageTweet, '[[handle]] - [[id]] - [[name]]', {
@@ -68,6 +89,19 @@ describe('Create filename', () => {
         format: 'YYYY-MM-DD',
       })
     ).toBe('Mappletons - 1292845757297557505 - Maggie Appleton 🧭.md')
+  })
+  it('Replaces handle, id, and name for directory', () => {
+    expect(
+      createFilename(
+        ImageTweet,
+        '[[handle]] - [[id]] - [[name]]',
+        {
+          locale: 'en',
+          format: 'YYYY-MM-DD',
+        },
+        'directory'
+      )
+    ).toBe('Mappletons - 1292845757297557505 - Maggie Appleton 🧭')
   })
   it('Does not double extension if .md is present', () => {
     expect(

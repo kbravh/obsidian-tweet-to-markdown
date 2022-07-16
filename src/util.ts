@@ -174,7 +174,7 @@ export const sanitizeFilename = (
     .replace(windowsReservedRe, '')
     .replace(windowsTrailingRe, '')
   if (type === 'file') {
-    filename = filename.replace('/', '')
+    filename = filename.replace(/\//g, '')
   }
   if (alter === 'decode') {
     filename = decodeURI(filename)
