@@ -212,10 +212,13 @@ export const createFilename = (
 ): string => {
   filename = filename ? filename : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
-  filename = filename.replace('[[name]]', tweet.includes.users[0].name)
-  filename = filename.replace('[[handle]]', tweet.includes.users[0].username)
-  filename = filename.replace('[[id]]', tweet.data.id)
-  filename = filename.replace('[[text]]', tweet.data.text)
+  filename = filename.replace(/\[\[name\]\]/gi, tweet.includes.users[0].name)
+  filename = filename.replace(
+    /\[\[handle\]\]/gi,
+    tweet.includes.users[0].username
+  )
+  filename = filename.replace(/\[\[id\]\]/gi, tweet.data.id)
+  filename = filename.replace(/\[\[text\]\]/gi, tweet.data.text)
   // date
   const dateRegex = /\[\[(date[:\w-]*)\]\]/
   if (dateRegex.test(filename)) {

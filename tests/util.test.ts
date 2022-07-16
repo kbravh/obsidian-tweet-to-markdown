@@ -111,6 +111,14 @@ describe('Create filename', () => {
       })
     ).toBe('Mappletons - 1292845757297557505 - Maggie Appleton 🧭.md')
   })
+  it('Replaces multiple occurrences of placeholders', () => {
+    expect(
+      createFilename(ImageTweet, '[[id]] - [[id]]', {
+        locale: 'en',
+        format: 'YYYY-MM-DD',
+      })
+    ).toBe('1292845757297557505 - 1292845757297557505.md')
+  })
   it('Replaces text and truncates', () => {
     expect(
       createFilename(ImageTweet, '[[text]]', {
