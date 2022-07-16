@@ -207,7 +207,8 @@ export const truncateBytewise = (string: string, length: number): string => {
 export const createFilename = (
   tweet: Tweet,
   filename = '',
-  timestampFormat: TimestampFormat
+  timestampFormat: TimestampFormat,
+  type: 'file' | 'directory' = 'file'
 ): string => {
   filename = filename ? filename : '[[handle]] - [[id]]'
   filename = filename.replace(/\.md$/, '') // remove md extension if provided
@@ -230,7 +231,9 @@ export const createFilename = (
       )
     }
   }
-  return sanitizeFilename(filename) + '.md'
+  return type === 'file'
+    ? sanitizeFilename(filename) + '.md'
+    : sanitizeFilename(filename, 'decode', 'directory')
 }
 
 export const formatTimestamp = (
@@ -243,13 +246,14 @@ export const formatTimestamp = (
 
 /**
  * Creates media links to embed media into the markdown file
- * @param {Media[]} media - The tweet media object provided by the Twitter v2 API
+ * @param tweet - The entire tweet object from the Twitter v2 API
  * @returns {string[]} - An array of markdown image links
  */
 export const createMediaElements = (
   settings: TTMSettings,
-  media: Media[]
+  tweet: Tweet
 ): string[] => {
+  const media = tweet.includes?.media
   return media
     .map((medium: Media) => {
       if (settings.downloadAssets) {
@@ -258,7 +262,15 @@ export const createMediaElements = (
           settings.imageEmbedStyle === 'markdown' ? 'encode' : 'decode'
         const filepath = normalizePath(
           `${sanitizeFilename(
-            assetLocation,
+            createFilename(
+              tweet,
+              assetLocation,
+              {
+                locale: settings.dateLocale,
+                format: settings.dateFormat,
+              },
+              'directory'
+            ),
             alter,
             'directory'
           )}/${sanitizeFilename(medium.media_key, alter)}.jpg`
@@ -405,9 +417,19 @@ export const buildMarkdown = async (
         plugin.settings.downloadAssets
       const alter = obsidianImageEmbeds ? 'decode' : 'encode'
       const filename = `${normalizePath(
-        `${sanitizeFilename(assetPath, alter, 'directory')}/${getAvatarFilename(
-          user
-        )}`
+        `${sanitizeFilename(
+          createFilename(
+            tweet,
+            assetPath,
+            {
+              locale: plugin.settings.dateLocale,
+              format: plugin.settings.dateFormat,
+            },
+            'directory'
+          ),
+          alter,
+          'directory'
+        )}/${getAvatarFilename(user)}`
       )}`
       if (obsidianImageEmbeds) {
         markdown.push(
@@ -454,9 +476,7 @@ export const buildMarkdown = async (
   }
 
   if (tweet.includes?.media && plugin.settings.includeImages) {
-    markdown = markdown.concat(
-      createMediaElements(plugin.settings, tweet.includes?.media)
-    )
+    markdown = markdown.concat(createMediaElements(plugin.settings, tweet))
   }
 
   // download images
@@ -526,7 +546,15 @@ export const downloadImages = (
   plugin: TTM
 ): void => {
   const assetLocation = sanitizeFilename(
-    plugin.settings.assetLocation || 'assets',
+    createFilename(
+      tweet,
+      plugin.settings.assetLocation,
+      {
+        locale: plugin.settings.dateLocale,
+        format: plugin.settings.dateFormat,
+      },
+      'directory'
+    ) || 'assets',
     'decode',
     'directory'
   )
@@ -682,7 +710,15 @@ export const pasteTweet = async (
     })
     filename = sanitizeFilename(filename, 'decode')
     const location = sanitizeFilename(
-      plugin.settings.noteLocation,
+      createFilename(
+        tweet,
+        plugin.settings.noteLocation,
+        {
+          locale: plugin.settings.dateLocale,
+          format: plugin.settings.dateFormat,
+        },
+        'directory'
+      ),
       'decode',
       'directory'
     )

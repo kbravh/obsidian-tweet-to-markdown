@@ -47,7 +47,15 @@ export class TweetCompleteModal extends Modal {
       button.onClick(async () => {
         // see if file already exists
         const location = sanitizeFilename(
-          this.plugin.settings.noteLocation,
+          createFilename(
+            this.plugin.currentTweet,
+            this.plugin.settings.noteLocation,
+            {
+              locale: this.plugin.settings.dateLocale,
+              format: this.plugin.settings.dateFormat,
+            },
+            'directory'
+          ),
           'decode',
           'directory'
         )
