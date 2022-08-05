@@ -37,7 +37,7 @@ export const getTweetID = (src: string): string => {
 }
 
 export const getTweet = async (id: string, bearer: string): Promise<Tweet> => {
-  if (bearer.startsWith('TTM>')) {
+  if (bearer.startsWith('TTM')) {
     return getTweetFromTTM(id, bearer)
   }
   return getTweetFromTwitter(id, bearer)
