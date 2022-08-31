@@ -10,7 +10,7 @@ import {
   TAbstractFile,
 } from 'obsidian'
 import {createDownloadManager, DownloadManager} from './downloadManager'
-import type {Media, Poll, Tweet, User} from './types/tweet'
+import type {Entities, Media, Mention, Poll, Tag, Tweet, TweetURL, User} from './types/tweet'
 import {decode} from 'html-entities'
 import {moment} from 'obsidian'
 import {TimestampFormat} from './types/plugin'
@@ -306,6 +306,62 @@ export const createMediaElements = (
     .filter(medium => !!medium)
 }
 
+type GenericEntity = Pick<
+  Mention & Tag & TweetURL & {replacement: string},
+  'start' | 'end' | 'replacement'
+>
+/**
+ * replace any mentions, hashtags, cashtags, urls with links
+ */
+export const replaceEntities = (entities: Entities, text: string): string => {
+  /**
+   * Each entity comes with start and end indices. However, if we were to replace
+   * them in the order they occur, the indices further down the line would be shifted
+   * and inaccurate. So we sort them in reverse order and work up from the end of the tweet.
+   */
+  const allEntities: GenericEntity[] = [
+    ...(entities?.mentions ?? []).map(mention => ({
+      ...mention,
+      replacement: `[@${mention.username}](https://twitter.com/${mention.username})`,
+    })),
+    ...(entities?.hashtags ?? []).map(hashtag => ({
+      ...hashtag,
+      replacement: `[#${hashtag.tag}](https://twitter.com/hashtag/${hashtag.tag})`,
+    })),
+    ...(entities?.cashtags ?? []).map(cashtag => ({
+      ...cashtag,
+      replacement: `[$${cashtag.tag}](https://twitter.com/search?q=%24${cashtag.tag})`,
+    }))
+    // Sort in reverse order
+  ].sort((a, b) => b.start - a.start)
+
+  const urlSet = new Set()
+  const urls = (entities?.urls ?? []).filter(url => {
+    if (urlSet.has(url.expanded_url)) {
+      return false
+    } else {
+      urlSet.add(url.expanded_url)
+      return true
+    }
+  })
+
+  for (const entity of allEntities) {
+    text =
+      text.substring(0, entity.start) +
+      entity.replacement +
+      text.substring(entity.end)
+  }
+
+  urls.forEach(url => {
+    text = text.replace(
+      new RegExp(url.url, 'g'),
+      `[${url.display_url}](${url.expanded_url})`
+    )
+  })
+
+  return text
+}
+
 /**
  * Creates the entire Markdown string of the provided tweet
  */
@@ -343,60 +399,7 @@ export const buildMarkdown = async (
    * replace entities with markdown links
    */
   if (tweet.data?.entities && plugin.settings.includeLinks) {
-    /**
-     * replace any mentions, hashtags, cashtags, urls with links
-     */
-    /**
-     * replace any mentions, hashtags, cashtags, urls with links
-     */
-    const mentions = [
-      ...new Set(
-        (tweet.data.entities?.mentions ?? []).map(mention => mention.username)
-      ),
-    ]
-    const tags = [
-      ...new Set(
-        (tweet.data.entities?.hashtags ?? []).map(hashtag => hashtag.tag)
-      ),
-    ]
-    const cashtags = [
-      ...new Set(
-        (tweet.data.entities?.cashtags ?? []).map(cashtag => cashtag.tag)
-      ),
-    ]
-    const urlSet = new Set()
-    const urls = (tweet.data.entities?.urls ?? []).filter(url => {
-      if (urlSet.has(url.expanded_url)) {
-        return false
-      } else {
-        urlSet.add(url.expanded_url)
-        return true
-      }
-    })
-    mentions.forEach(username => {
-      text = text.replace(
-        new RegExp(`@${username}`, 'g'),
-        `[@${username}](https://twitter.com/${username})`
-      )
-    })
-    tags.forEach(tag => {
-      text = text.replace(
-        new RegExp(`#${tag}`, 'g'),
-        `[#${tag}](https://twitter.com/hashtag/${tag}) `
-      )
-    })
-    cashtags.forEach(tag => {
-      text = text.replace(
-        new RegExp(`$${tag}`, 'g'),
-        `[$${tag}](https://twitter.com/search?q=%24${tag})`
-      )
-    })
-    urls.forEach(url => {
-      text = text.replace(
-        new RegExp(url.url, 'g'),
-        `[${url.display_url}](${url.expanded_url})`
-      )
-    })
+    text = replaceEntities(tweet.data.entities, text)
   }
 
   const date = formatTimestamp(tweet.data.created_at, {
