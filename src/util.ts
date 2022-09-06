@@ -355,10 +355,11 @@ export const replaceEntities = (entities: Entities, text: string): string => {
   })
 
   for (const entity of allEntities) {
+    const chars = [...text]
     text =
-      text.substring(0, entity.start) +
+      chars.slice(0, entity.start).join('') +
       entity.replacement +
-      text.substring(entity.end)
+      chars.slice(entity.end).join('')
   }
 
   urls.forEach(url => {
@@ -386,7 +387,17 @@ export const buildMarkdown = async (
     throw new Error('A thread tweet must have a previous author')
   }
 
-  let text = decode(tweet.data.text)
+  let text = tweet.data.text
+
+  /**
+   * replace entities with markdown links
+   */
+  if (tweet.data?.entities && plugin.settings.includeLinks) {
+    text = replaceEntities(tweet.data.entities, text)
+  }
+
+  text = decode(text)
+
   const user = tweet.includes.users[0]
 
   const isCondensedThreadTweet = !(
@@ -403,13 +414,6 @@ export const buildMarkdown = async (
     `retweets: ${tweet.data.public_metrics.retweet_count}`,
     `replies: ${tweet.data.public_metrics.reply_count}`,
   ]
-
-  /**
-   * replace entities with markdown links
-   */
-  if (tweet.data?.entities && plugin.settings.includeLinks) {
-    text = replaceEntities(tweet.data.entities, text)
-  }
 
   const date = formatTimestamp(tweet.data.created_at, {
     locale: plugin.settings.dateLocale,
