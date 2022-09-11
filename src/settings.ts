@@ -19,6 +19,7 @@ export interface TTMSettings {
   freeformFrontmatter: string[]
   avatars: boolean
   avatarSize: string
+  defaultToThread: boolean
   condensedThread: boolean
   /** @deprecated - split into includeImages and includeLinks */
   textOnly: boolean
@@ -46,6 +47,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   freeformFrontmatter: [],
   avatars: true,
   avatarSize: '',
+  defaultToThread: false,
   condensedThread: false,
   textOnly: false,
   includeImages: true,
@@ -205,6 +207,20 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.tweetCompleteAction)
           .onChange(async (value: TweetCompleteAction) => {
             this.plugin.settings.tweetCompleteAction = value
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Default to thread download')
+      .setDesc(
+        'Defaults to downloading a tweet thread instead of a single tweet. This option can still be toggled on the tweet download window This does not apply to pasted tweets.'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.defaultToThread)
+          .onChange(async value => {
+            this.plugin.settings.defaultToThread = value
             await this.plugin.saveSettings()
           })
       )

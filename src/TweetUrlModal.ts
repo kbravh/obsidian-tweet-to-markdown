@@ -13,6 +13,7 @@ export class TweetUrlModal extends Modal {
   constructor(app: App, plugin: TTM) {
     super(app)
     this.plugin = plugin
+    this.thread = this.plugin.settings.defaultToThread
   }
 
   onOpen(): void {
@@ -35,9 +36,11 @@ export class TweetUrlModal extends Modal {
         'Download a tweet thread. (Put the link to the LAST tweet in the thread).'
       )
       .addToggle(toggle => {
-        toggle.setValue(false).onChange(value => {
-          this.thread = value
-        })
+        toggle
+          .setValue(this.plugin.settings.defaultToThread)
+          .onChange(value => {
+            this.thread = value
+          })
       })
 
     new Setting(contentEl)
