@@ -290,7 +290,10 @@ export const createMediaElements = (
         switch (medium.type) {
           case 'photo':
             if (settings.imageEmbedStyle === 'markdown') {
-              return `\n![${medium.alt_text ?? medium.media_key}${
+              const alt_text = medium.alt_text
+                ? medium.alt_text.replace(/\n/g, ' ')
+                : ''
+              return `\n![${alt_text ?? medium.media_key}${
                 settings.imageSize ? `|${settings.imageSize}` : ''
               }](${filepath})`
             } else {
@@ -303,10 +306,14 @@ export const createMediaElements = (
         }
       } else {
         switch (medium.type) {
-          case 'photo':
-            return `\n![${medium.alt_text ?? medium.media_key}${
+          case 'photo': {
+            const alt_text = medium.alt_text
+              ? medium.alt_text.replace(/\n/g, ' ')
+              : ''
+            return `\n![${alt_text ?? medium.media_key}${
               settings.imageSize ? `|${settings.imageSize}` : ''
             }](${medium.url})`
+          }
           default:
             break
         }
