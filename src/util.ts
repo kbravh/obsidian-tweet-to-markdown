@@ -434,7 +434,7 @@ export const buildMarkdown = async (
    */
   const frontmatter = []
   if (plugin.settings.frontmatter) {
-    const fetchedAt = formatTimestamp(new Date().toString(), {
+    const fetchedAt = formatTimestamp(new Date().toISOString(), {
       locale: plugin.settings.dateLocale,
       format: plugin.settings.dateFormat,
     })
