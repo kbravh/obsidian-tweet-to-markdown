@@ -604,13 +604,13 @@ export const downloadImages = (
   const assetLocation = sanitizeFilename(
     createFilename(
       tweet,
-      plugin.settings.assetLocation,
+      plugin.settings.assetLocation ? plugin.settings.assetLocation : 'assets',
       {
         locale: plugin.settings.dateLocale,
         format: plugin.settings.dateFormat,
       },
       'directory'
-    ) || 'assets',
+    ),
     'decode',
     'directory'
   )
