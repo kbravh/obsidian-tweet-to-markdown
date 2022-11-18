@@ -17,6 +17,7 @@ export interface TTMSettings {
   tags: string[]
   cssclass: string
   freeformFrontmatter: string[]
+  escapeHashtags: boolean
   avatars: boolean
   avatarSize: string
   defaultToThread: boolean
@@ -45,6 +46,7 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   tags: [],
   cssclass: '',
   freeformFrontmatter: [],
+  escapeHashtags: false,
   avatars: true,
   avatarSize: '',
   defaultToThread: false,
@@ -293,6 +295,20 @@ export class TTMSettingTab extends PluginSettingTab {
           .onChange(async value => {
             const freeform = value.split('\n').filter(line => !!line)
             this.plugin.settings.freeformFrontmatter = freeform
+            await this.plugin.saveSettings()
+          })
+      )
+
+    new Setting(containerEl)
+      .setName('Escape hashtags')
+      .setDesc(
+        'Prevent hashtags from being included in Obsidian tags (change # to \\#)'
+      )
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.escapeHashtags)
+          .onChange(async value => {
+            this.plugin.settings.escapeHashtags = value
             await this.plugin.saveSettings()
           })
       )

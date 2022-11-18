@@ -329,7 +329,11 @@ type GenericEntity = Pick<
 /**
  * replace any mentions, hashtags, cashtags, urls with links
  */
-export const replaceEntities = (entities: Entities, text: string): string => {
+export const replaceEntities = (
+  settings: TTMSettings,
+  entities: Entities,
+  text: string
+): string => {
   /**
    * Each entity comes with start and end indices. However, if we were to replace
    * them in the order they occur, the indices further down the line would be shifted
@@ -342,7 +346,9 @@ export const replaceEntities = (entities: Entities, text: string): string => {
     })),
     ...(entities?.hashtags ?? []).map(hashtag => ({
       ...hashtag,
-      replacement: `[#${hashtag.tag}](https://twitter.com/hashtag/${hashtag.tag})`,
+      replacement: `[${settings.escapeHashtags ? '\\' : ''}#${
+        hashtag.tag
+      }](https://twitter.com/hashtag/${hashtag.tag})`,
     })),
     ...(entities?.cashtags ?? []).map(cashtag => ({
       ...cashtag,
@@ -400,7 +406,7 @@ export const buildMarkdown = async (
    * replace entities with markdown links
    */
   if (tweet.data?.entities && plugin.settings.includeLinks) {
-    text = replaceEntities(tweet.data.entities, text)
+    text = replaceEntities(plugin.settings, tweet.data.entities, text)
   }
 
   text = decode(text)
