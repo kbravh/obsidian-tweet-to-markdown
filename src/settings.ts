@@ -1,7 +1,8 @@
-import {App, moment, Platform, PluginSettingTab, Setting} from 'obsidian'
+import {App, moment, Platform, PluginSettingTab, Setting, ToggleComponent} from 'obsidian'
 import {TweetCompleteAction, TweetCompleteActions} from './types/plugin'
 import {FolderSuggest} from './suggester/folderSuggester'
 import TTM from 'main'
+import { exists } from 'fs'
 
 export interface TTMSettings {
   bearerToken: string | null
@@ -29,6 +30,10 @@ export interface TTMSettings {
   includeDate: boolean
   dateFormat: string
   dateLocale: string
+  pollEnabled: boolean
+  pollHandles: string
+  pollFilename: string
+  pollFrequency: 'monthly' | 'weekly' | 'twoDaily' | 'daily' | 'twiceDaily' | 'hourly'
 }
 
 export const DEFAULT_SETTINGS: TTMSettings = {
@@ -56,6 +61,10 @@ export const DEFAULT_SETTINGS: TTMSettings = {
   includeDate: true,
   dateFormat: 'LLL',
   dateLocale: 'en',
+  pollEnabled: false,
+  pollHandles: '',
+  pollFilename: 'Twitter timeline - [[handle]]', //Unfortunately, seems to displace the placeholder but how else do you set a default?
+  pollFrequency: 'daily'
 }
 
 export class TTMSettingTab extends PluginSettingTab {
@@ -63,6 +72,7 @@ export class TTMSettingTab extends PluginSettingTab {
   locales = moment
     .locales()
     .reduce((obj, locale) => ({...obj, [locale]: locale}), {})
+  pollEnableToggle: ToggleComponent
 
   constructor(app: App, plugin: TTM) {
     super(app, plugin)
@@ -402,6 +412,78 @@ export class TTMSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.embedMethod)
           .onChange(async (value: 'text' | 'obsidian') => {
             this.plugin.settings.embedMethod = value
+            await this.plugin.saveSettings()
+          })
+      )
+    
+    containerEl.createEl('h2', {text: 'Additional Settings for Polling Tweets'})
+
+    new Setting(containerEl)
+      .setName('Polling enabled')
+      .setDesc(
+        'Periodically poll for new tweets.'
+      )
+      .addToggle(toggle => {
+        toggle
+          .setValue(this.plugin.settings.pollEnabled)
+          .onChange(async value => {
+            this.plugin.settings.pollEnabled = value
+            await this.plugin.saveSettings()
+          })
+        this.pollEnableToggle = toggle
+      })
+
+    new Setting(containerEl)
+      .setName('Twitter handles to poll')
+      .setDesc(
+        'Handles (with or without @ prefix) to poll for new tweets, separated by commas.'
+      )
+      .addText(text =>
+        text
+          .setPlaceholder('@handle1,@handle2')
+          .setValue(this.plugin.settings.pollHandles)
+          .onChange(async value => {
+            this.plugin.settings.pollHandles = value
+            this.pollEnableToggle.setValue(false)
+            await this.plugin.saveSettings()
+          })
+      )
+    
+    new Setting(containerEl)
+      .setName('Filename to update with new tweets')
+      .setDesc(
+        'The name of the files to add new tweets to. Files are created if they don\'t exist. You can use the placeholders [[handle]], [[name]], [[text]] and [[id]]. Defaults to "Twitter timeline - [[handle]]"'
+      )
+      .addText(text =>
+        text
+          .setPlaceholder('Twitter timeline - [[handle]]')
+          .setValue(this.plugin.settings.pollFilename)
+          .onChange(async value => {
+            this.plugin.settings.pollFilename = value
+            this.pollEnableToggle.setValue(false)
+            await this.plugin.saveSettings()
+          })
+      )
+    
+    new Setting(containerEl)
+      .setName('Poll frequency')
+      .setDesc(
+        'How often to poll for new tweets.'
+      )
+      .addDropdown(dropdown =>
+        dropdown
+          .addOptions({
+            monthly:    'Monthly',
+            weekly:     'Weekly',
+            twoDaily:   'Every second day',
+            daily:      'Every day',
+            twiceDaily: 'Twice daily',
+            hourly:     'Hourly'
+          })
+          .setValue(this.plugin.settings.pollFrequency)
+          .onChange(async (value: 'monthly' | 'weekly' | 'twoDaily' | 'daily' | 'twiceDaily' | 'hourly' ) => {
+            this.plugin.settings.pollFrequency = value
+            this.pollEnableToggle.setValue(false)
             await this.plugin.saveSettings()
           })
       )

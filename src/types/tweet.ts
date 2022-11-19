@@ -119,3 +119,28 @@ export interface User {
   username: string
   profile_image_url: string
 }
+
+export interface UserResponse {
+  data: User
+  errors?: Error[]
+  // other error fields
+  reason?: string
+  status?: number
+}
+
+export interface Meta {
+  result_count: number
+  newest_id: string
+  oldest_id: string
+  next_token?: string
+}
+
+export interface Tweets {
+  includes: Includes
+  data: Data[]
+  meta: Meta
+  errors?: Error[]
+  // other error fields
+  reason?: string
+  status?: number
+}

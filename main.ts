@@ -4,6 +4,7 @@ import {pasteTweet} from 'src/util'
 import {Tweet} from 'src/types/tweet'
 import {TweetCompleteModal} from 'src/TweetCompleteModal'
 import {TweetUrlModal} from 'src/TweetUrlModal'
+import {createPollManager, PollManager} from 'src/pollManager'
 
 interface PasteFunction {
   (this: Plugin, ev: ClipboardEvent): void
@@ -16,6 +17,8 @@ export default class TTM extends Plugin {
   bearerToken: string
   tweetComplete: TweetCompleteModal
   pasteFunction: PasteFunction
+  pollManager: PollManager
+  pollIntervalID: number //should be ReturnType<typeof window.setInterval> but that seems to return the wrong type
 
   async onload(): Promise<void> {
     console.info('Loading Tweet to Markdown')
@@ -71,6 +74,8 @@ export default class TTM extends Plugin {
     })
 
     this.addSettingTab(new TTMSettingTab(this.app, this))
+
+    this.pollManager = createPollManager(this.app, this)
   }
 
   onunload(): void {
@@ -83,5 +88,24 @@ export default class TTM extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings)
+
+    if(this.settings.pollEnabled) {
+      if(this.pollIntervalID)
+        clearInterval(this.pollIntervalID) //registerInterval will still try to cancel it when unloading, but so be it.
+
+      this.pollManager.pollRun();
+
+      var numHours = 24 //by default
+      switch(this.settings.pollFrequency) {
+        case 'monthly':     { numHours = 24*30 }
+        case 'weekly':      { numHours = 24*7  }
+        case 'twoDaily':    { numHours = 24*2  }
+        case 'daily':       { numHours = 24*1  }
+        case 'twiceDaily':  { numHours = 24/2  }
+        case 'hourly':      { numHours = 1     }
+      }
+      this.pollIntervalID = window.setInterval(() => this.pollManager.pollRun(), 1000*60*60*numHours)
+      this.registerInterval(this.pollIntervalID)      
+    }
   }
 }
