@@ -450,8 +450,8 @@ export const buildMarkdown = async (
         `author: "${user.name}"`,
         `handle: "@${user.username}"`,
         `source: "https://twitter.com/${user.username}/status/${tweet.data.id}"`,
-        `date: "${date}"`,
-        `fetched: "${fetchedAt}"`,
+        `date: ${date}`,
+        `fetched: ${fetchedAt}`,
         ...metrics,
       ]
     )
