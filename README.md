@@ -17,7 +17,8 @@
 </p>
 
 ## Heads up! ⚠️
-Twitter announced that they would remove free access to the Twitter API on Feb. 13th, 2023, but have not done so yet. Currently, API access is still available. If they do remove access, the Free API Key method below will not work, and you'll need to sign up and pay for a Twitter bearer token.
+
+Due to recent changes to the Twitter API, the free access method listed below has stopped working as of April 27, 2023. You must sign up for your own Twitter bearer token to use this application.
 
 <!-- ABOUT THE PROJECT -->
 
@@ -41,8 +42,8 @@ To use this tool, you have two options:
 
 Getting a free API key from https://ttm.kbravh.dev is the easiest method of using this plugin, as you won't have to go through Twitter's developer application process. Their application is tedious, and they don't always approve requests. However, you are more than welcome to follow the guide below to retrieve your own bearer token from Twitter. This will give you the most control, freedom, and security over your usage.
 
-### Free TTM API key
-You can sign up for a free API key at https://ttm.kbravh.dev by signing in with either your GitHub or Twitter account and heading to your account page. Once you sign in and retrieve your API key from your account page, copy and paste it into the API key/bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TTM_API_KEY`.
+### Free TTM API key (❌ disabled)
+~~You can sign up for a free API key at https://ttm.kbravh.dev by signing in with either your GitHub or Twitter account and heading to your account page. Once you sign in and retrieve your API key from your account page, copy and paste it into the API key/bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TTM_API_KEY`.~~
 
 Nota bene: On Unix machines, make sure to set this environment variable in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
 
