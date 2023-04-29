@@ -16,7 +16,9 @@
   </p>
 </p>
 
-## Heads up! ⚠️
+⚠️ ## Heads up! ⚠️
+
+If your API key is not working, you will need to apply for a Twitter bearer token.
 
 Due to recent changes to the Twitter API, the free access method listed below has stopped working as of April 27, 2023. You must sign up for your own Twitter bearer token to use this application.
 
