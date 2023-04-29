@@ -16,7 +16,7 @@
   </p>
 </p>
 
-⚠️ ## Heads up! ⚠️
+## ⚠️ Heads up! ⚠️
 
 If your API key is not working, you will need to apply for a Twitter bearer token.
 
