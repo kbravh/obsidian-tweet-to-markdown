@@ -50,6 +50,9 @@ Getting a free API key from https://ttm.kbravh.dev is the easiest method of usin
 Nota bene: On Unix machines, make sure to set this environment variable in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
 
 ### Twitter Developer bearer token
+
+Nota bene: You need at least a **Basic** plan in order to look up tweets. The **Free** plan is not sufficient.
+
 To get a bearer token from Twitter, you'll need to set up an application on the [Twitter developer dashboard](https://developer.twitter.com/en/portal/dashboard). For a guide on doing so, see [Getting a bearer token](https://github.com/kbravh/obsidian-tweet-to-markdown/blob/main/BearerTokenGuide.md). Once you have the bearer token, you can paste it into the bearer token field on the Tweet to Markdown settings page. If you'd rather protect the token a bit more, you can store it in the environment variable `TWITTER_BEARER_TOKEN`.
 
 Nota bene: On Unix machines, make sure to set this environment variable in your profile file (such as `~/.bash_profile`) so that it will be available to Obsidian.
