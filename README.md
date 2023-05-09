@@ -1,3 +1,22 @@
+## About This Fork
+
+This project is a small fork of the excellent [Obsidian Tweet to Markdown](https://github.com/kbravh/obsidian-tweet-to-markdown) project. This fork adds **Poll Tweets** functionality to automatically fetch new tweets from a Twitter timeline and add them to your Obsidian vault.
+
+The feature can be found at bottom of the existing plugin settings, under the "Additional Settings for Polling Tweets" heading. Enabling polling will periodically check for new tweets from the Twitter handles specified, and prepend them in reverse chronological order (just like appears in the normal Twitter user timeline) to a Markdown file named using the pattern specified. If the file does not exist, it will be created and *all* tweets added (up to the API limit which is 3200 at the time of writing).
+
+<p align="center">
+  <img src="images/poll-tweets-screenshot.png" alt="Logo" height=250>
+</p>
+
+**Note:** the current implementation is alpha "just-working" stage. It may not work with settings other than the defaults, errors may not be reported effectively and the code is rough. Improvements welcome!
+
+The README from the original project appears below. Please do not bug the original author with issues associated with the **Poll Tweets** feature in this fork.
+
+---
+
+## Original Readme
+
+
 <br />
 <p align="center">
   <a href="https://github.com/kbravh/obsidian-tweet-to-markdown">

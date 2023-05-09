@@ -19,6 +19,8 @@ import type {
   Tweet,
   TweetURL,
   User,
+  UserResponse,
+  Tweets,
 } from './types/tweet'
 import {decode} from 'html-entities'
 import {moment} from 'obsidian'
@@ -854,4 +856,175 @@ export const getBearerToken = (plugin: TTM): string => {
 
 export const tweetStateCleanup = (plugin: TTM): void => {
   plugin.tweetMarkdown = ''
+}
+
+
+export const getUser = async (username: string, bearer: string): Promise<User> => {
+  if (bearer.startsWith('TTM')) {
+    return getUserFromTTM(username, bearer)
+  }
+  return getUserFromTwitter(username, bearer)
+}
+
+/**
+ * Fetches a user object from the Twitter v2 API
+ * @param {string} username - The username of the user to fetch from the API
+ * @param {string} bearer - The bearer token
+ * @returns {User} - The user from the Twitter API
+ */
+const getUserFromTwitter = async (
+  username: string,
+  bearer: string
+): Promise<User> => {
+  const twitterUrl = new URL(`https://api.twitter.com/2/users/by/username/${username}`)
+  const params = new URLSearchParams({
+    'user.fields': 'name,username,profile_image_url',
+  })
+
+  let userRequest
+  try {
+    userRequest = await request({
+      method: 'GET',
+      url: `${twitterUrl.href}?${params.toString()}`,
+      headers: {Authorization: `Bearer ${bearer}`},
+    })
+  } catch (error) {
+    if (error.request) {
+      throw new Error('There seems to be a connection issue.')
+    } else {
+      console.error(error)
+      throw error
+    }
+  }
+  const userResponse: UserResponse = JSON.parse(userRequest)
+  if (userResponse.errors) {
+    throw new Error(userResponse.errors[0].detail)
+  }
+  if (userResponse?.status === 401) {
+    throw new Error('There seems to be a problem with your bearer token.')
+  }
+  if (userResponse?.reason) {
+    switch (userResponse.reason) {
+      case 'client-not-enrolled':
+      default:
+        throw new Error('There seems to be a problem with your bearer token.')
+    }
+  }
+  return userResponse.data
+}
+
+/**
+ * Fetches a user object from the TTM service API
+ * @param {string} username - The username of the user to fetch from the API
+ * @param {string} bearer - The bearer token
+ * @returns {Promise<User>} - The user from the Twitter API
+ */
+const getUserFromTTM = async (username: string, bearer: string): Promise<User> => {
+  throw new Error('Fetching users from the TTM service API not currently supported.')
+  
+  return undefined
+}
+
+export const getTimeline = async (userId: string, since: Date, bearer: string): Promise<Tweet[]> => {
+  if (bearer.startsWith('TTM')) {
+    return getTimelineFromTTM(userId, since, bearer)
+  }
+  return getTimelineFromTwitter(userId, since, bearer)
+}
+
+/**
+ * Fetches a user's tweet timeline as an array of tweets in reverse chronological order from the Twitter v2 API
+ * @param {string} userId - The userId of the timeline to fetch from the API
+ * @param {Date}   since  - Fetch all tweets after this date. Pass "undefined" to fetch all tweets.
+ * @param {string} bearer - The bearer token
+ * @returns {Tweet[]} - The tweets from the Twitter API
+ */
+const getTimelineFromTwitter = async (userId: string, since: Date, bearer: string): Promise<Tweet[]> => {
+  const twitterUrl = new URL(`https://api.twitter.com/2/users/${userId}/tweets`)
+  const params = new URLSearchParams({
+    expansions: 'author_id,attachments.poll_ids,attachments.media_keys',
+    'user.fields': 'name,username,profile_image_url',
+    'tweet.fields':
+      'attachments,public_metrics,entities,conversation_id,referenced_tweets,created_at',
+    'media.fields': 'url,alt_text',
+    'poll.fields': 'options',
+  })
+
+  if(since)
+    params.set("start_time", since.toISOString());
+
+  var hasNextPage:boolean = true
+  var nextToken:string = undefined
+  var ret:Tweet[] = []
+
+  while (hasNextPage) {
+      
+    let tweetsRequest
+    try {
+      if(nextToken) {
+        params.set("pagination_token", nextToken)
+      }
+
+      tweetsRequest = await request({
+        method: 'GET',
+        url: `${twitterUrl.href}?${params.toString()}`,
+        headers: {Authorization: `Bearer ${bearer}`},
+      })
+    } catch (error) {
+      if (error.request) {
+        throw new Error('There seems to be a connection issue.')
+      } else {
+        console.error(error)
+        throw error
+      }
+    }
+    const tweets: Tweets = JSON.parse(tweetsRequest)
+    if (tweets.errors) {
+      throw new Error(tweets.errors[0].detail)
+    }
+    if (tweets?.status === 401) {
+      throw new Error('There seems to be a problem with your bearer token.')
+    }
+    if (tweets?.reason) {
+      switch (tweets.reason) {
+        case 'client-not-enrolled':
+        default:
+          throw new Error('There seems to be a problem with your bearer token.')
+      }
+    }
+
+    if(tweets.data) {
+      tweets.data.forEach(t => {
+        var media = tweets.includes.media && t.attachments && t.attachments.media_keys ?
+                    tweets.includes.media.filter(m => t.attachments.media_keys.includes(m.media_key)) :
+                    null
+        var polls = tweets.includes.polls && t.attachments && t.attachments.poll_ids ?
+                    tweets.includes.polls.filter(p => t.attachments.poll_ids.includes(p.id)) :
+                    null
+        ret.push({
+          includes: {users: tweets.includes.users, media: media, polls: polls},
+          data: t
+        })
+      })
+    }
+
+    if (tweets.meta.next_token) {
+      nextToken = tweets.meta.next_token;
+    } else {
+      hasNextPage = false;
+    }
+  }
+
+  return ret
+}
+
+/**
+ * Fetches a user object from the TTM service API
+ * @param {string} userId - The userId of the timeline to fetch from the API
+ * @param {Date}   since  - Fetch all tweets after this date. Pass "undefined" to fetch all tweets.
+ * @param {string} bearer - The bearer token
+ * @returns {Promise<User>} - The user from the Twitter API
+ */
+const getTimelineFromTTM = async (userId: string, since: Date, bearer: string): Promise<Tweet[]> => {
+  throw new Error('Fetching users from the TTM service API not currently supported.')
 }
